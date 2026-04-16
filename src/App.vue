@@ -1,32 +1,36 @@
 <template>
   <div class="app-container">
+    <!-- 登录界面 -->
+    <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
+    
     <!-- 主要内容区域 -->
-    <div class="main-content">
-      <TodoList v-if="activeTab === 'todo'" @start-focus="handleStartFocus" />
+    <div v-else class="main-content">
+      <TodoList v-if="activeTab === 'todo'" :active-tab="activeTab" ref="todoListRef" @start-focus="handleStartFocus" />
       <Schedule v-if="activeTab === 'schedule'" />
       <div v-if="activeTab === 'todoSet'" class="placeholder-page">
         <h2>待办集</h2>
         <p>功能开发中...</p>
       </div>
-      <SelfDiscipline v-if="activeTab === 'lock'" :focus-todo="currentFocusTodo" />
+      <SelfDiscipline v-if="activeTab === 'lock'" :focus-todo="currentFocusTodo" @update:todo="handleUpdateTodo" />
       <Stats v-if="activeTab === 'stats'" />
-      <Profile v-if="activeTab === 'profile'" />
+      <Profile v-if="activeTab === 'profile'" :user-info="userInfo" @logout="handleLogout" />
     </div>
 
     <!-- 底部导航栏 -->
-     <!-- BottomNav内部可以获取刀标签方法:changeTab-->
-    <BottomNav :activeTab="activeTab" @changeTab="handleTabChange" />
+    <BottomNav v-if="isLoggedIn" :activeTab="activeTab" @changeTab="handleTabChange" />
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import TodoList from './components/TodoList.vue'
 import Schedule from './components/Schedule.vue'
 import SelfDiscipline from './components/SelfDiscipline.vue'
 import BottomNav from './components/BottomNav.vue'
 import Stats from './components/Stats.vue'
 import Profile from './components/Profile.vue'
+import Login from './components/Login.vue'
+import { getCurrentUser } from './utils/api'
 
 export default {
   name: 'App',
@@ -36,11 +40,33 @@ export default {
     SelfDiscipline,
     BottomNav,
     Stats,
-    Profile
+    Profile,
+    Login
   },
   setup() {
     const activeTab = ref('todo')
     const currentFocusTodo = ref(null)
+    const isLoggedIn = ref(false)
+    const userInfo = ref(null)
+    const todoListRef = ref(null)
+
+    // 检查登录状态
+    const checkLoginStatus = async () => {
+      try {
+        const user = await getCurrentUser()
+        if (user) {
+          userInfo.value = user
+          isLoggedIn.value = true
+        } else {
+          isLoggedIn.value = false
+          userInfo.value = null
+        }
+      } catch (error) {
+        console.error('Error checking login status:', error)
+        isLoggedIn.value = false
+        userInfo.value = null
+      }
+    }
 
     const handleTabChange = (tab) => {
       activeTab.value = tab
@@ -51,11 +77,43 @@ export default {
       activeTab.value = 'lock'
     }
 
+    const handleUpdateTodo = (updatedTodo) => {
+      currentFocusTodo.value = updatedTodo
+      // 无论当前在哪个标签页，都更新TodoList组件中的待办事项
+      if (todoListRef.value) {
+        todoListRef.value.loadTodos()
+      }
+    }
+
+    const handleLoginSuccess = (user) => {
+      userInfo.value = user
+      isLoggedIn.value = true
+      activeTab.value = 'todo'
+    }
+
+    const handleLogout = async () => {
+      // 清除本地存储
+      localStorage.removeItem('userInfo')
+      localStorage.removeItem('token')
+      isLoggedIn.value = false
+      userInfo.value = null
+    }
+
+    onMounted(() => {
+      checkLoginStatus()
+    })
+
     return {
       activeTab,
       currentFocusTodo,
+      isLoggedIn,
+      userInfo,
+      todoListRef,
       handleTabChange,
-      handleStartFocus
+      handleStartFocus,
+      handleUpdateTodo,
+      handleLoginSuccess,
+      handleLogout
     }
   }
 }

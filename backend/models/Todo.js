@@ -29,6 +29,22 @@ const Todo = sequelize.define('Todo', {
     validate: {
       isIn: [['low', 'medium', 'high']]
     }
+  },
+  targetMinutes: {
+    type: DataTypes.INTEGER,
+    defaultValue: 60
+  },
+  currentMinutes: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  progress: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  timeInfo: {
+    type: DataTypes.STRING,
+    defaultValue: '0/60 分钟'
   }
 }, {
   tableName: 'todos',

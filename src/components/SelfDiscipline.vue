@@ -202,8 +202,8 @@
 </template>
 
 <script>
-import { ref, computed, onUnmounted } from 'vue'
-import { createFocusSession } from '../utils/api'
+import { ref, computed, onUnmounted, onMounted } from 'vue'
+import { createFocusSession, updateTodo, getFocusSessions } from '../utils/api'
 
 export default {
   name: 'SelfDiscipline',
@@ -215,7 +215,9 @@ export default {
       default: null
     }
   },
-  setup(props) {
+  emits: ['update:todo'],
+
+  setup(props, { emit }) {
     const isActive = ref(false)
     const isPaused = ref(false)
     const startTime = ref(null)
@@ -223,19 +225,47 @@ export default {
     const timer = ref(null)
     const elapsedTime = ref(0)
     
-    // 专注记录数据（模拟数据）
-    const focusSessions = ref([
-      { date: '2026-04-02', duration: 120 }, // 今日 2小时
-      { date: '2026-04-01', duration: 90 },  // 昨日 1.5小时
-      { date: '2026-03-31', duration: 150 }, // 前天 2.5小时
-      { date: '2026-03-30', duration: 60 },  // 上周
-      { date: '2026-03-29', duration: 180 }, // 上周
-      { date: '2026-03-28', duration: 120 }, // 上周
-      { date: '2026-03-27', duration: 90 },  // 上周
-      { date: '2026-03-26', duration: 150 }, // 上周
-      { date: '2026-03-15', duration: 180 }, // 本月
-      { date: '2026-03-10', duration: 240 }, // 本月
-    ])
+    // 专注记录数据
+    const focusSessions = ref([])
+    
+    // 加载专注记录
+    const loadFocusSessions = async () => {
+      try {
+        const sessions = await getFocusSessions()
+        // 按日期分组，计算每天的总专注时长
+        const sessionsByDate = {}
+        sessions.forEach(session => {
+          const date = session.date
+          if (!sessionsByDate[date]) {
+            sessionsByDate[date] = 0
+          }
+          sessionsByDate[date] += session.duration
+        })
+        
+        // 转换为数组格式
+        const formattedSessions = Object.entries(sessionsByDate).map(([date, duration]) => ({
+          date,
+          duration
+        }))
+        
+        focusSessions.value = formattedSessions
+      } catch (error) {
+        console.error('Error loading focus sessions:', error)
+        // 如果加载失败，使用默认数据
+        focusSessions.value = [
+          { date: '2026-04-02', duration: 120 }, // 今日 2小时
+          { date: '2026-04-01', duration: 90 },  // 昨日 1.5小时
+          { date: '2026-03-31', duration: 150 }, // 前天 2.5小时
+          { date: '2026-03-30', duration: 60 },  // 上周
+          { date: '2026-03-29', duration: 180 }, // 上周
+          { date: '2026-03-28', duration: 120 }, // 上周
+          { date: '2026-03-27', duration: 90 },  // 上周
+          { date: '2026-03-26', duration: 150 }, // 上周
+          { date: '2026-03-15', duration: 180 }, // 本月
+          { date: '2026-03-10', duration: 240 }, // 本月
+        ]
+      }
+    }
     
     // 每日专注目标（默认180分钟，3小时）
     const dailyGoal = ref(parseInt(localStorage.getItem('dailyFocusGoal')) || 180)
@@ -408,6 +438,9 @@ export default {
       currentPoetry.value = poetryList[Math.floor(Math.random() * poetryList.length)]
     }
     
+    // 记录番茄钟工作时间
+    const pomodoroWorkTimeAccumulated = ref(0)
+    
     // 开始番茄钟
     const startPomodoro = () => {
       isPomodoroBreak.value = false
@@ -421,6 +454,8 @@ export default {
       pomodoroTimer.value = setTimeout(() => {
         // 工作时间结束，进入休息时间
         pomodoroCycle.value++
+        // 累加工作时间
+        pomodoroWorkTimeAccumulated.value += pomodoroWorkTime.value
         isPomodoroBreak.value = true
         
         // 可以添加提示音或通知
@@ -465,7 +500,20 @@ export default {
     const stopDiscipline = async () => {
       if (isActive.value && startTime.value) {
         // 计算专注时长（分钟）
-        const duration = Math.round((Date.now() - startTime.value) / 60000)
+        let duration = 0
+        if (selectedMode.value === 'pomodoro') {
+          // 番茄钟模式，只计算工作时间
+          // 累加当前正在进行的工作时间
+          if (!isPomodoroBreak.value) {
+            const currentWorkDuration = Math.round((Date.now() - startTime.value) / 60000)
+            duration = pomodoroWorkTimeAccumulated.value + currentWorkDuration
+          } else {
+            duration = pomodoroWorkTimeAccumulated.value
+          }
+        } else {
+          // 自由模式，计算所有时间
+          duration = Math.round((Date.now() - startTime.value) / 60000)
+        }
         
         // 保存专注时间记录到数据库
         if (duration > 0) {
@@ -486,6 +534,57 @@ export default {
           } catch (error) {
             console.error('Error saving focus session:', error)
           }
+          
+          // 更新本地的 focusSessions 数组
+          const existingSessionIndex = focusSessions.value.findIndex(session => session.date === date)
+          if (existingSessionIndex !== -1) {
+            // 如果今天已经有专注记录，更新它
+            focusSessions.value[existingSessionIndex].duration += duration
+          } else {
+            // 如果今天没有专注记录，添加一个新的
+            focusSessions.value.push({
+              date,
+              duration
+            })
+          }
+          
+          // 更新待办事项的专注时间和进度
+          if (props.focusTodo) {
+            try {
+              const updatedCurrentMinutes = (props.focusTodo.currentMinutes || 0) + duration
+              const targetMinutes = props.focusTodo.targetMinutes || 60
+              const progress = Math.min(Math.round((updatedCurrentMinutes / targetMinutes) * 100), 100)
+              
+              const updatedTodo = await updateTodo(props.focusTodo.id, {
+                currentMinutes: updatedCurrentMinutes,
+                progress: progress,
+                timeInfo: `${updatedCurrentMinutes}/${targetMinutes} 分钟`
+              })
+              console.log('Todo updated successfully')
+              
+              // 发送事件通知父组件更新待办事项
+              emit('update:todo', {
+                ...props.focusTodo,
+                currentMinutes: updatedCurrentMinutes,
+                progress: progress,
+                timeInfo: `${updatedCurrentMinutes}/${targetMinutes} 分钟`
+              })
+            } catch (error) {
+              console.error('Error updating todo:', error)
+              // 即使发生错误，也要更新本地状态
+              const updatedCurrentMinutes = (props.focusTodo.currentMinutes || 0) + duration
+              const targetMinutes = props.focusTodo.targetMinutes || 60
+              const progress = Math.min(Math.round((updatedCurrentMinutes / targetMinutes) * 100), 100)
+              
+              // 发送事件通知父组件更新待办事项
+              emit('update:todo', {
+                ...props.focusTodo,
+                currentMinutes: updatedCurrentMinutes,
+                progress: progress,
+                timeInfo: `${updatedCurrentMinutes}/${targetMinutes} 分钟`
+              })
+            }
+          }
         }
       }
       
@@ -499,6 +598,7 @@ export default {
       isPaused.value = false
       isPomodoroBreak.value = false
       pomodoroCycle.value = 0
+      pomodoroWorkTimeAccumulated.value = 0
       if (timer.value) clearInterval(timer.value)
       elapsedTime.value = 0
       pausedTime.value = 0
@@ -512,8 +612,13 @@ export default {
       console.log('每日专注目标已保存:', dailyGoal.value, '分钟')
     }
     
+    onMounted(() => {
+      loadFocusSessions()
+    })
+    
     onUnmounted(() => {
       if (timer.value) clearInterval(timer.value)
+      if (pomodoroTimer.value) clearTimeout(pomodoroTimer.value)
     })
     
     return {

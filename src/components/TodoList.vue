@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { getTodos, createTodo, updateTodo, deleteTodo as deleteTodoApi } from '../utils/api'
 import TodoInput from './TodoInput.vue'
 import TodoItem from './TodoItem.vue'
@@ -87,6 +87,12 @@ export default {
     TodoItem,
     TodoFooter
   },
+  props: {
+    activeTab: {
+      type: String,
+      default: 'todo'
+    }
+  },
   emits: ['start-focus'],
   setup(props, { emit }) {
     const todos = ref([])
@@ -95,7 +101,6 @@ export default {
     const editText = ref('')
     const showAddForm = ref(false)
 
-    // 默认风景图片列表
     const defaultImages = [
       new URL('../img/item1.png', import.meta.url).href,
       new URL('../img/item2.png', import.meta.url).href,
@@ -121,39 +126,44 @@ export default {
       return todos.value.filter(todo => todo.completed).length
     })
 
-    // 加载待办事项
     const loadTodos = async () => {
       const data = await getTodos()
-      // 为每个待办事项添加默认值（如果没有的话）
       const updatedTodos = data.map(todo => {
         if (!todo.image) {
           todo.image = defaultImages[Math.floor(Math.random() * defaultImages.length)]
         }
         if (!todo.progress) {
-          todo.progress = Math.floor(Math.random() * 30)
+          todo.progress = 0
         }
         if (!todo.progressLabel) {
           todo.progressLabel = '正向计时-目标'
         }
+        if (!todo.targetMinutes) {
+          todo.targetMinutes = 60 
+        }
+        if (!todo.currentMinutes) {
+          todo.currentMinutes = 0 
+        }
         if (!todo.timeInfo) {
-          const targetMinutes = Math.floor(Math.random() * 5000) + 1000
-          const currentMinutes = Math.floor(targetMinutes * (todo.progress / 100))
-          todo.timeInfo = `${currentMinutes}/${targetMinutes} 分钟`
+          todo.timeInfo = `${todo.currentMinutes}/${todo.targetMinutes} 分钟`
         }
         return todo
       })
       todos.value = updatedTodos
     }
+    
+    if (typeof defineExpose !== 'undefined') {
+      defineExpose({
+        loadTodos
+      })
+    }
 
-    const addTodo = async (text) => {
+    const addTodo = async (text, targetMinutes = 60) => {
       if (text.trim()) {
         try {
-          // 生成随机风景图
           const randomImage = defaultImages[Math.floor(Math.random() * defaultImages.length)]
-          // 生成随机进度信息
-          const progress = Math.floor(Math.random() * 30) // 0-30% 之间的随机进度
-          const targetMinutes = Math.floor(Math.random() * 5000) + 1000 // 1000-6000 分钟的目标
-          const currentMinutes = Math.floor(targetMinutes * (progress / 100))
+          const progress = 0
+          const currentMinutes = 0
           
           const newTodo = await createTodo({
             text: text.trim(),
@@ -161,15 +171,18 @@ export default {
             image: randomImage,
             progress: progress,
             progressLabel: '正向计时-目标',
-            timeInfo: `${currentMinutes}/${targetMinutes} 分钟`
+            timeInfo: `${currentMinutes}/${targetMinutes} 分钟`,
+            targetMinutes: targetMinutes, 
+            currentMinutes: currentMinutes 
           })
           
-          // 如果后端没有保存这些字段，手动添加
           if (!newTodo.image) {
             newTodo.image = randomImage
             newTodo.progress = progress
             newTodo.progressLabel = '正向计时-目标'
             newTodo.timeInfo = `${currentMinutes}/${targetMinutes} 分钟`
+            newTodo.targetMinutes = targetMinutes
+            newTodo.currentMinutes = currentMinutes
           }
           
           todos.value.push(newTodo)
@@ -186,10 +199,13 @@ export default {
           const updatedTodo = await updateTodo(id, {
             completed: !todo.completed
           })
-          // 更新本地状态
+
           const index = todos.value.findIndex(t => t.id === id)
           if (index !== -1) {
-            todos.value[index] = updatedTodo
+            todos.value[index] = {
+              ...todos.value[index],
+              ...updatedTodo
+            }
           }
         } catch (error) {
           console.error('Error toggling todo:', error)
@@ -219,10 +235,12 @@ export default {
         const updatedTodo = await updateTodo(id, {
           text: text
         })
-        // 更新本地状态
         const index = todos.value.findIndex(t => t.id === id)
         if (index !== -1) {
-          todos.value[index] = updatedTodo
+          todos.value[index] = {
+            ...todos.value[index],
+            ...updatedTodo
+          }
         }
       } catch (error) {
         console.error('Error saving todo:', error)
@@ -243,12 +261,18 @@ export default {
           console.error('Error deleting completed todo:', error)
         }
       }
-      // 重新加载数据
+
       await loadTodos()
     }
 
     onMounted(() => {
       loadTodos()
+    })
+
+    watch(() => props.activeTab, (newTab) => {
+      if (newTab === 'todo') {
+        loadTodos()
+      }
     })
 
     const startFocus = (todo) => {
@@ -266,10 +290,10 @@ export default {
       completedCount,
       addTodo,
       toggleTodo,
-      deleteTodo,
       startEdit,
       saveTodo,
       cancelEdit,
+      deleteTodo,
       clearCompleted,
       startFocus
     }
@@ -362,7 +386,7 @@ export default {
   gap: 16px;
 }
 
-/* 自定义按钮样式 */
+
 .todo-filters .el-button {
   border-radius: 20px;
   padding: 6px 16px;
@@ -373,7 +397,7 @@ export default {
   transform: scale(1.05);
 }
 
-/* PC端样式 */
+
 @media (min-width: 1024px) {
   .todo-list-container {
     max-width: 900px;
@@ -400,7 +424,7 @@ export default {
   }
 }
 
-/* 平板端样式 */
+
 @media (min-width: 769px) and (max-width: 1023px) {
   .todo-list-container {
     max-width: 100%;
@@ -408,7 +432,7 @@ export default {
   }
 }
 
-/* 移动端样式 */
+
 @media (max-width: 768px) {
   .todo-list-container {
     max-width: 100%;

@@ -91,7 +91,7 @@ export default {
   font-size: 12px;
 }
 
-/* 为底部内容留出空间 */
+
 .main-content {
   padding-bottom: 80px;
   padding-bottom: calc(80px + env(safe-area-inset-bottom));

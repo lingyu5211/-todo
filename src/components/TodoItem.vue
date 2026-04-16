@@ -99,7 +99,6 @@ export default {
     const editText = ref(props.todo.text)
     const editInput = ref(null)
 
-    // 默认风景图片列表 (添加png格式图片)
     const defaultImages = [
       new URL('../img/item1.png', import.meta.url).href,
       new URL('../img/item2.png', import.meta.url).href,
@@ -108,19 +107,17 @@ export default {
       new URL('../img/item5.png', import.meta.url).href
     ]
 
-    // 计算进度条颜色
     const progressColor = computed(() => {
       const progress = props.todo.progress || 0
-      if (progress < 30) return '#67c23a' // 绿色
-      if (progress < 70) return '#e6a23c' // 橙色
-      return '#f56c6c' // 红色
+      if (progress < 30) return '#67c23a' 
+      if (progress < 70) return '#e6a23c' 
+      return '#f56c6c' 
     })
 
     watch(() => props.editingId, (newVal) => {
       isEditing.value = newVal === props.todo.id
       if (isEditing.value) {
         editText.value = props.todo.text
-        // 直接聚焦，不需要setTimeout
         nextTick(() => {
           editInput.value?.focus()
         })
@@ -337,7 +334,6 @@ export default {
   gap: 8px;
 }
 
-/* 已完成状态 */
 .todo-card.completed {
   opacity: 0.7;
   filter: grayscale(30%);
@@ -347,7 +343,7 @@ export default {
   text-decoration: line-through;
 }
 
-/* 响应式设计 */
+
 @media (max-width: 768px) {
   .todo-card {
     margin-bottom: 12px;

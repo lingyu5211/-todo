@@ -15,26 +15,27 @@
           <el-button circle size="small" class="action-btn">
             <span>⚙️</span>
           </el-button>
-          <el-button circle size="small" class="action-btn">
-            <span>⋮</span>
+          <el-button circle size="small" class="action-btn" @click="handleLogout">
+            <span>🚪</span>
           </el-button>
         </div>
         <div class="user-info">
-          <div class="avatar">
-            <div class="avatar-img">
-              🌙
+            <div class="avatar">
+              <div class="avatar-img">
+                {{ userInfo.avatar }}
+              </div>
+              <span class="crown">👑</span>
             </div>
-            <span class="crown">👑</span>
+            <div class="stats-badges">
+              <el-tag type="danger" class="stat-badge">共专注{{ userInfo.totalFocusDays }}天</el-tag>
+              <el-tag type="danger" class="stat-badge">连续专注{{ userInfo.consecutiveFocusDays }}天</el-tag>
+              <el-tag v-if="userInfo.role === 'admin'" type="warning" class="stat-badge">管理员</el-tag>
+            </div>
+            <div class="user-name">
+              <h2>{{ userInfo.name }}</h2>
+            </div>
+            <p class="user-motto">{{ userInfo.motto }}</p>
           </div>
-          <div class="stats-badges">
-            <el-tag type="danger" class="stat-badge">共专注14天</el-tag>
-            <el-tag type="danger" class="stat-badge">连续专注1天</el-tag>
-          </div>
-          <div class="user-name">
-            <h2>嗨寻</h2>
-          </div>
-          <p class="user-motto">钱是第一驱动力</p>
-        </div>
       </div>
     </div>
 
@@ -188,11 +189,19 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { getThemeSettings, saveThemeSettings } from '../utils/api'
 
 export default {
   name: 'Profile',
-  setup() {
+  props: {
+    userInfo: {
+      type: Object,
+      required: true
+    }
+  },
+  emits: ['logout'],
+  setup(props, { emit }) {
     const showThemeDialog = ref(false)
     
     const themes = [
@@ -208,15 +217,42 @@ export default {
     
     const currentTheme = ref(themes[0])
     
-    const selectTheme = (theme) => {
-      currentTheme.value = theme
+    // 加载主题设置
+    const loadThemeSettings = async () => {
+      try {
+        const data = await getThemeSettings()
+        // 找到对应的主题
+        const theme = themes.find(t => t.id === data.id) || themes[0]
+        currentTheme.value = theme
+      } catch (error) {
+        console.error('Error loading theme settings:', error)
+      }
     }
+    
+    const selectTheme = async (theme) => {
+      currentTheme.value = theme
+      try {
+        await saveThemeSettings(theme)
+        console.log('Theme saved successfully')
+      } catch (error) {
+        console.error('Error saving theme:', error)
+      }
+    }
+    
+    const handleLogout = () => {
+      emit('logout')
+    }
+    
+    onMounted(() => {
+      loadThemeSettings()
+    })
     
     return {
       showThemeDialog,
       themes,
       currentTheme,
-      selectTheme
+      selectTheme,
+      handleLogout
     }
   }
 }
