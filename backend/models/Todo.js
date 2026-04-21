@@ -45,6 +45,11 @@ const Todo = sequelize.define('Todo', {
   timeInfo: {
     type: DataTypes.STRING,
     defaultValue: '0/60 分钟'
+  },
+  todoSetId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null
   }
 }, {
   tableName: 'todos',

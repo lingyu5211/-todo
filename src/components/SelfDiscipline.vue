@@ -1,5 +1,19 @@
 <template>
   <div class="self-discipline-container">
+    <div class="self-discipline-header">
+      <h1>自律钟</h1>
+      <div class="header-actions">
+        <el-button circle size="small" class="action-btn">
+          <span>🔄</span>
+        </el-button>
+        <el-button circle size="small" class="action-btn">
+          <span>📊</span>
+        </el-button>
+        <el-button circle size="small" class="action-btn">
+          <span>⚙️</span>
+        </el-button>
+      </div>
+    </div>
     <!-- 开始界面 -->
     <div v-if="!isActive" class="discipline-start">
       <el-card class="start-card">
@@ -657,11 +671,59 @@ export default {
 .self-discipline-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+}
+
+.self-discipline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.self-discipline-header h1 {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.action-btn {
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: white;
+  font-size: 16px;
+}
+
+.action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 /* 开始界面样式 */
 .discipline-start {
+  margin: 20px;
   margin-bottom: 20px;
 }
 
@@ -932,6 +994,7 @@ export default {
 
 /* 自律模式样式 */
 .discipline-active {
+  margin: 20px;
   margin-bottom: 20px;
 }
 

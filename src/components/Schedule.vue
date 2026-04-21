@@ -279,22 +279,23 @@ export default {
 
 <style scoped>
 .schedule-container {
-  max-width: 800px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
 }
 
 .schedule-header {
-  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .header-card {
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  padding: 20px;
+  padding: 15px 20px;
 }
 
 .calendar-nav {
@@ -334,8 +335,8 @@ export default {
 }
 
 .header-btn {
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: transparent;
+  border: none;
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -344,16 +345,16 @@ export default {
   justify-content: center;
   transition: all 0.3s ease;
   color: white;
+  font-size: 16px;
 }
 
 .header-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .calendar-card {
-  margin-bottom: 20px;
+  margin: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;

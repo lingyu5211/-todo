@@ -23,7 +23,8 @@ router.post('/', async (req, res) => {
       targetMinutes: req.body.targetMinutes || 60,
       currentMinutes: req.body.currentMinutes || 0,
       progress: req.body.progress || 0,
-      timeInfo: req.body.timeInfo || '0/60 分钟'
+      timeInfo: req.body.timeInfo || '0/60 分钟',
+      todoSetId: req.body.todoSetId || null
     });
     res.status(201).json(newTodo);
   } catch (error) {
@@ -47,7 +48,8 @@ router.patch('/:id', getTodo, async (req, res) => {
       targetMinutes: req.body.targetMinutes !== undefined ? req.body.targetMinutes : res.todo.targetMinutes,
       currentMinutes: req.body.currentMinutes !== undefined ? req.body.currentMinutes : res.todo.currentMinutes,
       progress: req.body.progress !== undefined ? req.body.progress : res.todo.progress,
-      timeInfo: req.body.timeInfo || res.todo.timeInfo
+      timeInfo: req.body.timeInfo || res.todo.timeInfo,
+      todoSetId: req.body.todoSetId !== undefined ? req.body.todoSetId : res.todo.todoSetId
     });
     res.json(updatedTodo);
   } catch (error) {

@@ -175,15 +175,14 @@ export default {
 
 <style scoped>
 .todo-card {
-  margin-bottom: 16px;
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  min-height: 120px;
+  min-height: 100px;
   background-size: cover;
   background-position: center;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .todo-card::before {
@@ -193,19 +192,19 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%);
   z-index: 1;
 }
 
 .todo-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .todo-content {
   position: relative;
   z-index: 2;
-  padding: 20px;
+  padding: 16px;
   color: white;
 }
 
@@ -213,7 +212,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .todo-title {
@@ -221,7 +220,7 @@ export default {
 }
 
 .todo-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   margin-left: 8px;
@@ -242,37 +241,37 @@ export default {
 
 .todo-status {
   background-color: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
   font-weight: bold;
 }
 
 .todo-progress {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .progress-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 4px;
+  font-size: 12px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .todo-progress-bar {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .todo-progress-bar .el-progress__text {
   color: white;
-  font-size: 12px;
+  font-size: 10px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .time-info {
-  font-size: 12px;
+  font-size: 10px;
   opacity: 0.9;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
@@ -288,9 +287,10 @@ export default {
   color: #409EFF;
   border: none;
   border-radius: 20px;
-  padding: 8px 20px;
+  padding: 6px 16px;
+  font-size: 12px;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .start-btn:hover {
@@ -300,13 +300,13 @@ export default {
 
 .edit-delete-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .edit-btn, .delete-btn {
   border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 4px 8px;
+  font-size: 10px;
   opacity: 0.8;
 }
 

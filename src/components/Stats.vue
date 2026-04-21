@@ -205,7 +205,7 @@ export default {
 
 <style scoped>
 .stats-container {
-  padding: 20px;
+  padding: 0;
   padding-bottom: 100px;
   background: linear-gradient(to bottom, #e0f7fa, #ffffff);
   min-height: 100vh;
@@ -215,27 +215,49 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .stats-header h1 {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: bold;
-  color: #0288d1;
+  color: white;
   margin: 0;
 }
 
 .header-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .action-btn {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: white;
+  font-size: 16px;
+}
+
+.action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .stats-card {
-  margin-bottom: 20px;
+  margin: 20px;
   border-radius: 16px;
   border: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);

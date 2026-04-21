@@ -303,11 +303,10 @@ export default {
 
 <style scoped>
 .todo-list-container {
-
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: beige;
+  padding: 0;
+  background-color: #f5f5f5;
   min-height: 100vh;
 }
 
@@ -315,20 +314,20 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .todo-header h1 {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   color: white;
   margin: 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .header-actions {
@@ -338,8 +337,8 @@ export default {
 }
 
 .header-btn {
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: transparent;
+  border: none;
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -348,20 +347,19 @@ export default {
   justify-content: center;
   transition: all 0.3s ease;
   color: white;
+  font-size: 16px;
 }
 
 .header-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .todo-info {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .todo-info p {
@@ -374,22 +372,23 @@ export default {
 .todo-filters {
   display: flex;
   gap: 10px;
-  margin: 20px 0;
+  margin: 10px 20px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .todo-items {
-  margin-bottom: 20px;
+  margin: 0 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 
 .todo-filters .el-button {
   border-radius: 20px;
-  padding: 6px 16px;
+  padding: 4px 12px;
+  font-size: 12px;
   transition: all 0.3s ease;
 }
 

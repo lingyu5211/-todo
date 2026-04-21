@@ -7,10 +7,7 @@
     <div v-else class="main-content">
       <TodoList v-if="activeTab === 'todo'" :active-tab="activeTab" ref="todoListRef" @start-focus="handleStartFocus" />
       <Schedule v-if="activeTab === 'schedule'" />
-      <div v-if="activeTab === 'todoSet'" class="placeholder-page">
-        <h2>待办集</h2>
-        <p>功能开发中...</p>
-      </div>
+      <TodoSet v-if="activeTab === 'todoSet'" />
       <SelfDiscipline v-if="activeTab === 'lock'" :focus-todo="currentFocusTodo" @update:todo="handleUpdateTodo" />
       <Stats v-if="activeTab === 'stats'" />
       <Profile v-if="activeTab === 'profile'" :user-info="userInfo" @logout="handleLogout" />
@@ -29,6 +26,7 @@ import SelfDiscipline from './components/SelfDiscipline.vue'
 import BottomNav from './components/BottomNav.vue'
 import Stats from './components/Stats.vue'
 import Profile from './components/Profile.vue'
+import TodoSet from './components/TodoSet.vue'
 import Login from './components/Login.vue'
 import { getCurrentUser } from './utils/api'
 
@@ -41,6 +39,7 @@ export default {
     BottomNav,
     Stats,
     Profile,
+    TodoSet,
     Login
   },
   setup() {

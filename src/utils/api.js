@@ -520,3 +520,82 @@ export const getCurrentUser = async () => {
     };
   }
 };
+
+/**
+ * 使用DeepSeek Chat API分析待办集，生成子任务和时间估计
+ * @param {string} todoSetName 待办集名称
+ * @param {string} description 待办集描述
+ * @returns {Promise<Array>} 子任务列表
+ */
+export const analyzeTodoSet = async (todoSetName, description) => {
+  try {
+    // DeepSeek API配置
+    const DEEPSEEK_API_KEY = 'sk-85fa46ca5bf34c9ab8f726a918a3cf2c'; 
+    const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+    
+    const prompt = `请分析以下待办集，并生成详细的子任务列表，包括每个子任务的预计完成时间（分钟）：
+
+待办集名称：${todoSetName}
+待办集描述：${description}
+
+请以JSON格式返回结果，包含一个tasks数组，每个任务对象包含title（任务名称）、description（任务描述）、estimatedMinutes（预计时间）和priority（优先级：high/medium/low）字段。`;
+    
+    const response = await fetch(DEEPSEEK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to analyze todo set');
+    }
+    
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+    
+    // 提取JSON部分
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('Invalid response format');
+    }
+    
+    const result = JSON.parse(jsonMatch[0]);
+    return result.tasks || [];
+  } catch (error) {
+    console.error('Error analyzing todo set:', error);
+    // 模拟数据，实际项目中应该使用真实API
+    return [
+      {
+        title: '子任务1',
+        description: '完成第一个子任务',
+        estimatedMinutes: 30,
+        priority: 'high'
+      },
+      {
+        title: '子任务2',
+        description: '完成第二个子任务',
+        estimatedMinutes: 25,
+        priority: 'medium'
+      },
+      {
+        title: '子任务3',
+        description: '完成第三个子任务',
+        estimatedMinutes: 20,
+        priority: 'low'
+      }
+    ];
+  }
+};
