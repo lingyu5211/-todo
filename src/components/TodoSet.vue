@@ -77,7 +77,7 @@
                   <h4 class="task-title">{{ task.title }}</h4>
                   <p class="task-meta">{{ task.type }} {{ task.progress }} 今日 {{ task.todayMinutes }}/{{ task.totalMinutes }} 分钟</p>
                 </div>
-                <el-button type="primary" class="start-btn">开始</el-button>
+                <el-button type="primary" class="start-btn" @click="startFocus(task)">开始</el-button>
               </div>
             </div>
             
@@ -112,11 +112,12 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { analyzeTodoSet, createTodo, getTodos } from '../utils/api'
+import { analyzeTodoSet, createTodo, getTodos, getTodoSets, createTodoSet } from '../utils/api'
 
 export default {
   name: 'TodoSet',
-  setup() {
+  emits: ['start-focus'],
+  setup(props, { emit }) {
     const showAddForm = ref(false)
     const showAddTaskForm = ref(null)
     const isAnalyzing = ref(false)
@@ -135,12 +136,6 @@ export default {
     
     const todoSets = ref([
       {
-        id: 1,
-        name: '实习',
-        expanded: true,
-        tasks: []
-      },
-      {
         id: null,
         name: '未分类',
         expanded: true,
@@ -148,10 +143,37 @@ export default {
       }
     ])
     
+    // 加载待办集
+    const loadTodoSets = async () => {
+      try {
+        const sets = await getTodoSets()
+        // 清空现有待办集（保留未分类）
+        const uncategorizedSet = todoSets.value.find(set => set.id === null)
+        todoSets.value = [uncategorizedSet]
+        
+        // 添加从数据库加载的待办集
+        sets.forEach(set => {
+          todoSets.value.push({
+            id: set.id,
+            name: set.name,
+            description: set.description,
+            expanded: true,
+            tasks: []
+          })
+        })
+      } catch (error) {
+        console.error('Error loading todo sets:', error)
+      }
+    }
+    
     // 加载待办事项并分配到待办集
     const loadTodos = async () => {
       isLoading.value = true
       try {
+        // 先加载待办集
+        await loadTodoSets()
+        
+        // 再加载todos
         const todos = await getTodos()
         
         // 清空现有任务
@@ -199,20 +221,31 @@ export default {
       todoSets.value[index].expanded = !todoSets.value[index].expanded
     }
     
-    const addTodoSet = () => {
+    const addTodoSet = async () => {
       if (newTodoSet.value.name) {
-        // 生成唯一id（实际项目中应该由后端生成）
-        const newId = Math.max(...todoSets.value.filter(set => set.id !== null).map(set => set.id), 0) + 1
-        todoSets.value.push({
-          id: newId,
-          name: newTodoSet.value.name,
-          description: newTodoSet.value.description,
-          expanded: false,
-          tasks: []
-        })
-        newTodoSet.value.name = ''
-        newTodoSet.value.description = ''
-        showAddForm.value = false
+        try {
+          // 使用API创建待办集，由后端生成id
+          const createdSet = await createTodoSet({
+            name: newTodoSet.value.name,
+            description: newTodoSet.value.description
+          })
+          
+          // 添加到本地待办集列表
+          todoSets.value.push({
+            id: createdSet.id,
+            name: createdSet.name,
+            description: createdSet.description,
+            expanded: false,
+            tasks: []
+          })
+          
+          // 重置表单
+          newTodoSet.value.name = ''
+          newTodoSet.value.description = ''
+          showAddForm.value = false
+        } catch (error) {
+          console.error('Error adding todo set:', error)
+        }
       }
     }
     
@@ -265,12 +298,16 @@ export default {
         const tasks = await analyzeTodoSet(newTodoSet.value.name, newTodoSet.value.description)
         
         if (tasks.length > 0) {
-          // 生成唯一id（实际项目中应该由后端生成）
-          const newId = Math.max(...todoSets.value.filter(set => set.id !== null).map(set => set.id), 0) + 1
-          const newSet = {
-            id: newId,
+          // 使用API创建待办集，由后端生成id
+          const createdSet = await createTodoSet({
             name: newTodoSet.value.name,
-            description: newTodoSet.value.description,
+            description: newTodoSet.value.description
+          })
+          
+          const newSet = {
+            id: createdSet.id,
+            name: createdSet.name,
+            description: createdSet.description,
             expanded: true,
             tasks: []
           }
@@ -296,7 +333,7 @@ export default {
                 progress: 0,
                 progressLabel: '固定时长',
                 timeInfo: `0/${task.estimatedMinutes} 分钟`,
-                todoSetId: newId // 添加待办集id
+                todoSetId: createdSet.id // 添加待办集id
               })
             } catch (error) {
               console.error('Error adding task to todos:', error)
@@ -320,6 +357,20 @@ export default {
       return classes[index % classes.length]
     }
     
+    const startFocus = (task) => {
+      // 构建与TodoList相同格式的任务对象
+      const focusTask = {
+        id: task.id,
+        text: task.title,
+        targetMinutes: task.totalMinutes,
+        currentMinutes: task.todayMinutes || 0,
+        progress: parseInt(task.progress) || 0,
+        progressLabel: task.type,
+        timeInfo: task.timeInfo || `${task.todayMinutes || 0}/${task.totalMinutes} 分钟`
+      }
+      emit('start-focus', focusTask)
+    }
+    
     // 组件挂载时加载数据
     onMounted(() => {
       loadTodos()
@@ -338,7 +389,9 @@ export default {
       addTask,
       analyzeWithAI,
       getTaskClass,
-      loadTodos
+      loadTodos,
+      loadTodoSets,
+      startFocus
     }
   }
 }

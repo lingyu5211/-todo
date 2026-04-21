@@ -7,7 +7,7 @@
     <div v-else class="main-content">
       <TodoList v-if="activeTab === 'todo'" :active-tab="activeTab" ref="todoListRef" @start-focus="handleStartFocus" />
       <Schedule v-if="activeTab === 'schedule'" />
-      <TodoSet v-if="activeTab === 'todoSet'" />
+      <TodoSet v-if="activeTab === 'todoSet'" @start-focus="handleStartFocus" />
       <SelfDiscipline v-if="activeTab === 'lock'" :focus-todo="currentFocusTodo" @update:todo="handleUpdateTodo" />
       <Stats v-if="activeTab === 'stats'" />
       <Profile v-if="activeTab === 'profile'" :user-info="userInfo" @logout="handleLogout" />

@@ -530,7 +530,7 @@ export const getCurrentUser = async () => {
 export const analyzeTodoSet = async (todoSetName, description) => {
   try {
     // DeepSeek API配置
-    const DEEPSEEK_API_KEY = 'sk-85fa46ca5bf34c9ab8f726a918a3cf2c'; 
+    const DEEPSEEK_API_KEY = ''; 
     const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
     
     const prompt = `请分析以下待办集，并生成详细的子任务列表，包括每个子任务的预计完成时间（分钟）：
@@ -597,5 +597,81 @@ export const analyzeTodoSet = async (todoSetName, description) => {
         priority: 'low'
       }
     ];
+  }
+};
+
+// 获取所有待办集
+export const getTodoSets = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/todo-sets`);
+    if (!response.ok) throw new Error('Failed to fetch todo sets');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching todo sets:', error);
+    // 返回模拟数据作为备用
+    return [
+      { id: 1, name: '实习', description: '实习相关任务' }
+    ];
+  }
+};
+
+// 创建新待办集
+export const createTodoSet = async (todoSetData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/todo-sets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(todoSetData)
+    });
+    if (!response.ok) throw new Error('Failed to create todo set');
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating todo set:', error);
+    // 返回模拟数据作为备用
+    return {
+      id: Date.now(),
+      name: todoSetData.name,
+      description: todoSetData.description
+    };
+  }
+};
+
+// 更新待办集
+export const updateTodoSet = async (id, todoSetData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/todo-sets/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(todoSetData)
+    });
+    if (!response.ok) throw new Error('Failed to update todo set');
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating todo set:', error);
+    // 返回模拟数据作为备用
+    return {
+      id: id,
+      name: todoSetData.name || 'Unknown',
+      description: todoSetData.description || ''
+    };
+  }
+};
+
+// 删除待办集
+export const deleteTodoSet = async (id) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/todo-sets/${id}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) throw new Error('Failed to delete todo set');
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting todo set:', error);
+    // 返回模拟数据作为备用
+    return { message: '待办集已删除' };
   }
 };
