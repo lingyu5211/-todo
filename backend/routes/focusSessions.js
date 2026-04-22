@@ -55,15 +55,40 @@ router.get('/stats', async (req, res) => {
     
     // 计算今日专注时间
     const today = new Date().toISOString().split('T')[0];
-    const todaySessions = allSessions.filter(session => session.date === today);
-    const todayMinutes = todaySessions.reduce((sum, session) => sum + session.duration, 0);
+    
+    // 尝试从date字段中匹配今天的日期
+    const todaySessions = allSessions.filter(session => {
+      // 直接使用date字段的值进行匹配
+      return session.date === today;
+    });
+    
+    let todayMinutes = todaySessions.reduce((sum, session) => sum + session.duration, 0);
+    
+    // 按日期分组，用于前端图表显示
+    const sessionsByDate = allSessions.reduce((acc, session) => {
+      const date = session.date;
+      if (!acc[date]) {
+        acc[date] = {
+          date: date,
+          sessions: 0,
+          minutes: 0
+        };
+      }
+      acc[date].sessions++;
+      acc[date].minutes += session.duration;
+      return acc;
+    }, {});
+    
+    // 转换为数组格式
+    const sessionsByDateArray = Object.values(sessionsByDate);
     
     res.json({
       totalSessions,
       totalMinutes,
       avgMinutes,
       todaySessions: todaySessions.length,
-      todayMinutes
+      todayMinutes,
+      sessionsByDate: sessionsByDateArray
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -58,7 +58,7 @@
               <el-button circle size="small" @click="loadTodos">
                 <span>🔄</span>
               </el-button>
-              <el-button circle size="small">
+              <el-button circle size="small" @click="showTodoSetMenu(index, $event)">
                 <span>⚙️</span>
               </el-button>
               <el-button circle size="small" @click="showAddTaskForm = index">
@@ -107,6 +107,31 @@
         </div>
       </div>
     </div>
+    
+    <!-- 待办集菜单 -->
+    <div v-if="showMenu" class="todo-set-menu" :style="{ left: menuPosition.x + 'px', top: menuPosition.y + 'px' }">
+      <div class="menu-item" @click="editTodoSet">修改待办集信息</div>
+      <div class="menu-item" @click="reAnalyzeTodoSet">重新AI分析</div>
+      <div class="menu-item delete" @click="deleteTodoSetItem">删除待办集</div>
+    </div>
+    
+    <!-- 编辑待办集表单 -->
+    <el-dialog v-model="showEditForm" title="修改待办集" width="400px">
+      <el-form>
+        <el-form-item label="待办集名称">
+          <el-input v-model="editingTodoSet.name" placeholder="请输入待办集名称" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input type="textarea" v-model="editingTodoSet.description" placeholder="请输入待办集描述" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showEditForm = false">取消</el-button>
+          <el-button type="primary" @click="saveTodoSet">保存</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -142,6 +167,15 @@ export default {
         tasks: []
       }
     ])
+    
+    // 待办集菜单状态
+    const showMenu = ref(false)
+    const menuPosition = ref({ x: 0, y: 0 })
+    const currentTodoSetIndex = ref(-1)
+    
+    // 修改待办集状态
+    const editingTodoSet = ref(null)
+    const showEditForm = ref(false)
     
     // 加载待办集
     const loadTodoSets = async () => {
@@ -182,10 +216,15 @@ export default {
         })
         
         // 分配todos到对应的待办集
+        console.log('Loaded todo sets:', todoSets.value)
+        console.log('Loaded todos:', todos)
+        
         todos.forEach(todo => {
+          console.log('Processing todo:', todo.text, 'with todoSetId:', todo.todoSetId)
           // 根据todoSetId分配到对应的待办集
           const todoSet = todoSets.value.find(set => set.id === todo.todoSetId)
           if (todoSet) {
+            console.log('Found todo set:', todoSet.name, 'for todo:', todo.text)
             // 分配到指定待办集
             todoSet.tasks.push({
               id: todo.id,
@@ -196,6 +235,7 @@ export default {
               totalMinutes: todo.targetMinutes || 60
             })
           } else {
+            console.log('No todo set found for todo:', todo.text, 'with todoSetId:', todo.todoSetId)
             // 分配到未分类待办集
             const uncategorizedSet = todoSets.value.find(set => set.id === null)
             if (uncategorizedSet) {
@@ -371,6 +411,125 @@ export default {
       emit('start-focus', focusTask)
     }
     
+    // 显示待办集菜单
+    const showTodoSetMenu = (index, event) => {
+      event.stopPropagation()
+      const rect = event.target.getBoundingClientRect()
+      menuPosition.value = {
+        x: rect.left,
+        y: rect.bottom + 10
+      }
+      currentTodoSetIndex.value = index
+      showMenu.value = true
+      
+      // 点击其他地方关闭菜单
+      setTimeout(() => {
+        document.addEventListener('click', closeMenu)
+      }, 0)
+    }
+    
+    // 关闭待办集菜单
+    const closeMenu = () => {
+      showMenu.value = false
+      document.removeEventListener('click', closeMenu)
+    }
+    
+    // 编辑待办集
+    const editTodoSet = () => {
+      const todoSet = todoSets.value[currentTodoSetIndex.value]
+      editingTodoSet.value = { ...todoSet }
+      showEditForm.value = true
+      closeMenu()
+    }
+    
+    // 保存待办集修改
+    const saveTodoSet = async () => {
+      if (!editingTodoSet.value.name) return
+      
+      try {
+        // 这里应该调用API更新待办集
+        // 暂时直接更新本地数据
+        todoSets.value[currentTodoSetIndex.value] = { ...editingTodoSet.value }
+        showEditForm.value = false
+        editingTodoSet.value = null
+      } catch (error) {
+        console.error('Error updating todo set:', error)
+      }
+    }
+    
+    // 重新AI分析
+    const reAnalyzeTodoSet = async () => {
+      const todoSet = todoSets.value[currentTodoSetIndex.value]
+      if (!todoSet.name) return
+      
+      isAnalyzing.value = true
+      closeMenu()
+      
+      try {
+        const tasks = await analyzeTodoSet(todoSet.name, todoSet.description || '')
+        
+        if (tasks.length > 0) {
+          // 清空现有任务
+          todoSet.tasks = []
+          
+          // 添加新任务
+          for (const task of tasks) {
+            const taskData = {
+              id: Date.now() + Math.random(),
+              title: task.title,
+              type: '固定时长',
+              progress: '0%',
+              todayMinutes: 0,
+              totalMinutes: task.estimatedMinutes
+            }
+            todoSet.tasks.push(taskData)
+            
+            // 同时添加到todos
+            try {
+              await createTodo({
+                text: task.title,
+                completed: false,
+                targetMinutes: task.estimatedMinutes,
+                currentMinutes: 0,
+                progress: 0,
+                progressLabel: '固定时长',
+                timeInfo: `0/${task.estimatedMinutes} 分钟`,
+                todoSetId: todoSet.id
+              })
+            } catch (error) {
+              console.error('Error adding task to todos:', error)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error analyzing todo set:', error)
+      } finally {
+        isAnalyzing.value = false
+      }
+    }
+    
+    // 删除待办集
+    const deleteTodoSetItem = async () => {
+      if (currentTodoSetIndex.value === -1) return
+      
+      const todoSet = todoSets.value[currentTodoSetIndex.value]
+      if (todoSet.id === null) {
+        // 不能删除未分类待办集
+        return
+      }
+      
+      if (confirm(`确定要删除待办集 "${todoSet.name}" 吗？`)) {
+        try {
+          // 这里应该调用API删除待办集
+          // 暂时直接从本地数据中删除
+          todoSets.value.splice(currentTodoSetIndex.value, 1)
+          closeMenu()
+        } catch (error) {
+          console.error('Error deleting todo set:', error)
+        }
+      }
+    }
+    
     // 组件挂载时加载数据
     onMounted(() => {
       loadTodos()
@@ -391,7 +550,17 @@ export default {
       getTaskClass,
       loadTodos,
       loadTodoSets,
-      startFocus
+      startFocus,
+      showMenu,
+      menuPosition,
+      showTodoSetMenu,
+      closeMenu,
+      editTodoSet,
+      saveTodoSet,
+      reAnalyzeTodoSet,
+      deleteTodoSetItem,
+      showEditForm,
+      editingTodoSet
     }
   }
 }
@@ -625,5 +794,43 @@ export default {
     font-size: 12px;
     padding: 4px 12px;
   }
+}
+
+/* 待办集菜单样式 */
+.todo-set-menu {
+  position: fixed;
+  background-color: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.menu-item.delete {
+  color: #ff4d4f;
+}
+
+.menu-item.delete:hover {
+  background-color: #fff2f0;
+}
+
+/* 编辑表单样式 */
+.dialog-footer {
+  text-align: right;
+}
+
+.dialog-footer .el-button {
+  margin-left: 8px;
 }
 </style>

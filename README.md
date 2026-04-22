@@ -4,12 +4,22 @@
 
 这是一个基于 Vue 3 + Node.js + MySQL 的全栈待办事项和日程管理应用。项目将前端数据存储从 localStorage 迁移到了后端 MySQL 数据库，实现了数据的安全存储和管理。
 
+**主要功能**：
+- 待办事项管理（增删改查）
+- 日程事件管理（增删改查）
+- 待办集管理（创建、编辑、删除待办集）
+- 专注时间跟踪（自律钟功能）
+- 统计数据可视化（当日专注、月度专注分布）
+- 用户认证（登录、权限管理）
+- AI 辅助分析（自动生成子任务和时间估计）
+
 ## 技术栈
 
 ### 前端
 - Vue 3
 - Element Plus
 - Vite
+- ECharts（数据可视化）
 
 ### 后端
 - Node.js
@@ -26,11 +36,15 @@ todo-schedule-app/
 │   ├── config/          # 配置文件
 │   │   └── db.js        # 数据库连接配置
 │   ├── models/          # 数据模型
-│   │   ├── Todo.js      # 待办事项模型
-│   │   └── Event.js     # 日程事件模型
+│   │   ├── Todo.js          # 待办事项模型
+│   │   ├── Event.js         # 日程事件模型
+│   │   ├── FocusSession.js  # 专注会话模型
+│   │   └── TodoSet.js       # 待办集模型
 │   ├── routes/          # API 路由
-│   │   ├── todos.js     # 待办事项路由
-│   │   └── events.js    # 日程事件路由
+│   │   ├── todos.js         # 待办事项路由
+│   │   ├── events.js        # 日程事件路由
+│   │   ├── focusSessions.js # 专注会话路由
+│   │   └── todoSets.js      # 待办集路由
 │   ├── index.js         # 后端主入口
 │   ├── package.json     # 后端依赖
 │   └── package-lock.json
@@ -40,7 +54,11 @@ todo-schedule-app/
 │   │   ├── TodoItem.vue
 │   │   ├── TodoList.vue
 │   │   ├── TodoFooter.vue
-│   │   └── Schedule.vue
+│   │   ├── Schedule.vue
+│   │   ├── SelfDiscipline.vue    # 自律钟组件
+│   │   ├── Stats.vue             # 统计数据组件
+│   │   ├── TodoSet.vue           # 待办集组件
+│   │   └── Login.vue             # 登录组件
 │   ├── utils/           # 工具函数
 │   │   ├── api.js       # API 服务
 │   │   └── storage.js   # 本地存储（已废弃，保留作为参考）
@@ -124,6 +142,32 @@ npm run dev
 | PATCH | /api/events/:id | 更新日程事件 |
 | DELETE | /api/events/:id | 删除日程事件 |
 
+### 专注会话 API
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/focus-sessions | 获取所有专注会话 |
+| POST | /api/focus-sessions | 创建新专注会话 |
+| GET | /api/focus-sessions/stats | 获取专注统计数据 |
+
+### 待办集 API
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/todo-sets | 获取所有待办集 |
+| POST | /api/todo-sets | 创建新待办集 |
+| GET | /api/todo-sets/:id | 获取单个待办集 |
+| PATCH | /api/todo-sets/:id | 更新待办集 |
+| DELETE | /api/todo-sets/:id | 删除待办集 |
+
+### 用户认证 API
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| POST | /api/auth/login | 用户登录 |
+| POST | /api/auth/logout | 用户登出 |
+| GET | /api/auth/current-user | 获取当前用户 |
+
 ## 数据模型
 
 ### Todo 模型
@@ -136,6 +180,11 @@ npm run dev
 | createdAt | DATETIME | 创建时间 | 当前时间 |
 | dueDate | DATETIME | 截止日期 | null |
 | priority | STRING | 优先级 | 'medium' |
+| targetMinutes | INTEGER | 目标专注时间（分钟） | 60 |
+| currentMinutes | INTEGER | 当前专注时间（分钟） | 0 |
+| progress | INTEGER | 完成进度（百分比） | 0 |
+| timeInfo | STRING | 时间信息 | '0/60 分钟' |
+| todoSetId | INTEGER | 待办集 ID | null |
 
 ### Event 模型
 
@@ -146,6 +195,27 @@ npm run dev
 | date | STRING | 事件日期 | 无，必填 |
 | time | STRING | 事件时间 | 无，必填 |
 | color | STRING | 事件颜色 | '#409EFF' |
+| createdAt | DATETIME | 创建时间 | 当前时间 |
+
+### FocusSession 模型
+
+| 字段 | 类型 | 描述 | 默认值 |
+|------|------|------|--------|
+| id | INTEGER | 主键，自增 | 自动生成 |
+| todoId | INTEGER | 待办事项 ID | 无，必填 |
+| duration | INTEGER | 专注时长（分钟） | 0 |
+| date | STRING | 专注日期 | 无，必填 |
+| startTime | DATETIME | 开始时间 | 无，必填 |
+| endTime | DATETIME | 结束时间 | 无，必填 |
+| createdAt | DATETIME | 创建时间 | 当前时间 |
+
+### TodoSet 模型
+
+| 字段 | 类型 | 描述 | 默认值 |
+|------|------|------|--------|
+| id | INTEGER | 主键，自增 | 自动生成 |
+| name | STRING | 待办集名称 | 无，必填 |
+| description | STRING | 待办集描述 | null |
 | createdAt | DATETIME | 创建时间 | 当前时间 |
 
 ## 调试方法
@@ -236,3 +306,5 @@ npm run dev
 - v1.0.0：初始版本，使用 localStorage 存储
 - v2.0.0：迁移到 Node.js + MongoDB 后端
 - v3.0.0：迁移到 MySQL 数据库
+- v4.0.0：添加用户认证、待办集管理、专注时间跟踪和统计数据可视化功能
+- v4.1.0：添加 AI 辅助分析功能，支持自动生成子任务和时间估计

@@ -530,7 +530,7 @@ export const getCurrentUser = async () => {
 export const analyzeTodoSet = async (todoSetName, description) => {
   try {
     // DeepSeek API配置
-    const DEEPSEEK_API_KEY = ''; 
+    const DEEPSEEK_API_KEY = 'sk-c281c9a6ae4f4eeeb5c584d08a2e17de'; 
     const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
     
     const prompt = `请分析以下待办集，并生成详细的子任务列表，包括每个子任务的预计完成时间（分钟）：
@@ -603,7 +603,11 @@ export const analyzeTodoSet = async (todoSetName, description) => {
 // 获取所有待办集
 export const getTodoSets = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/todo-sets`);
+    const response = await fetch(`${API_BASE_URL}/todo-sets`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
     if (!response.ok) throw new Error('Failed to fetch todo sets');
     return await response.json();
   } catch (error) {
@@ -621,7 +625,8 @@ export const createTodoSet = async (todoSetData) => {
     const response = await fetch(`${API_BASE_URL}/todo-sets`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
       body: JSON.stringify(todoSetData)
     });
@@ -644,7 +649,8 @@ export const updateTodoSet = async (id, todoSetData) => {
     const response = await fetch(`${API_BASE_URL}/todo-sets/${id}`, {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
       body: JSON.stringify(todoSetData)
     });
@@ -665,7 +671,10 @@ export const updateTodoSet = async (id, todoSetData) => {
 export const deleteTodoSet = async (id) => {
   try {
     const response = await fetch(`${API_BASE_URL}/todo-sets/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
     });
     if (!response.ok) throw new Error('Failed to delete todo set');
     return await response.json();

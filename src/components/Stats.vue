@@ -6,10 +6,10 @@
         <el-button circle size="small" class="action-btn" @click="loadStats">
           <span>🔄</span>
         </el-button>
-        <el-button circle size="small" class="action-btn">
+        <el-button circle size="small" class="action-btn" @click="openTimeSettings">
           <span>⏰</span>
         </el-button>
-        <el-button circle size="small" class="action-btn">
+        <el-button circle size="small" class="action-btn" @click="viewAchievements">
           <span>🏆</span>
         </el-button>
       </div>
@@ -47,21 +47,21 @@
       <div class="card-header">
         <span class="card-title">当日专注 {{ todayDate }}</span>
         <div class="date-nav">
-          <el-button text size="small">
+          <el-button text size="small" @click="prevDate">
             <span>❮</span>
           </el-button>
-          <el-button text size="small">
+          <el-button text size="small" @click="nextDate">
             <span>❯</span>
           </el-button>
         </div>
       </div>
       <div class="daily-stats">
         <div class="daily-stat">
-          <div class="stat-value">{{ stats.todaySessions }}</div>
+          <div class="stat-value">{{ currentDaySessions }}</div>
           <div class="stat-label">次数</div>
         </div>
         <div class="daily-stat">
-          <div class="stat-value">{{ formatDuration(stats.todayMinutes) }}</div>
+          <div class="stat-value">{{ formatDuration(currentDayMinutes) }}</div>
           <div class="stat-label">时长</div>
         </div>
       </div>
@@ -72,12 +72,12 @@
       <div class="card-header">
         <span class="card-title">专注时长分布 {{ todayDate }}</span>
         <div class="card-actions">
-          <el-button text size="small">分享</el-button>
+          <el-button text size="small" @click="shareStats">分享</el-button>
           <div class="date-nav">
-            <el-button text size="small">
+            <el-button text size="small" @click="prevDate">
               <span>❮</span>
             </el-button>
-            <el-button text size="small">
+            <el-button text size="small" @click="nextDate">
               <span>❯</span>
             </el-button>
           </div>
@@ -94,10 +94,13 @@
           {{ tab }}
         </el-button>
       </div>
-      <div class="distribution-empty">
+      <div v-if="stats.sessionsByDate && stats.sessionsByDate.length > 0">
+        <div ref="focusDistributionChart" class="chart-container"></div>
+      </div>
+      <div v-else class="distribution-empty">
         <p>暂无专注数据，点击待办上的开始按钮来专注计时吧</p>
       </div>
-      <el-button class="view-record-btn" text>查看专注记录</el-button>
+      <el-button class="view-record-btn" text @click="viewRecords">查看专注记录</el-button>
     </el-card>
 
     <!-- 本月专注时段分布 -->
@@ -105,23 +108,19 @@
       <div class="card-header">
         <span class="card-title">本月专注时段分布 {{ currentMonth }}</span>
         <div class="date-nav">
-          <el-button text size="small">
+          <el-button text size="small" @click="prevMonth">
             <span>❮</span>
           </el-button>
-          <el-button text size="small">
+          <el-button text size="small" @click="nextMonth">
             <span>❯</span>
           </el-button>
         </div>
       </div>
-      <div class="monthly-distribution">
-        <div class="y-axis">
-          <div>80 分钟</div>
-          <div>60 分钟</div>
-          <div>40 分钟</div>
-        </div>
-        <div class="chart-container">
-          <div class="bar" style="height: 100%;"></div>
-        </div>
+      <div v-if="stats.sessionsByDate && stats.sessionsByDate.length > 0">
+        <div ref="monthlyDistributionChart" class="chart-container"></div>
+      </div>
+      <div v-else class="monthly-empty">
+        <p>暂无专注数据，点击待办上的开始按钮来专注计时吧</p>
       </div>
     </el-card>
     </div>
@@ -129,8 +128,9 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { getFocusStats } from '../utils/api'
+import * as echarts from 'echarts'
 
 export default {
   name: 'Stats',
@@ -144,17 +144,41 @@ export default {
       totalMinutes: 0,
       avgMinutes: 0,
       todaySessions: 0,
-      todayMinutes: 0
+      todayMinutes: 0,
+      sessionsByDate: []
     })
 
+    // 日期和月份状态
+    const selectedDate = ref(new Date())
+    const selectedMonth = ref(new Date())
+
+    // 图表实例
+    const focusDistributionChart = ref(null)
+    const chartInstance = ref(null)
+    const monthlyDistributionChart = ref(null)
+    const monthlyChartInstance = ref(null)
+
     const todayDate = computed(() => {
-      const now = new Date()
-      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+      const date = selectedDate.value
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    })
+
+    // 根据当前选择的日期获取对应的专注次数和时长
+    const currentDaySessions = computed(() => {
+      const sessionsByDate = stats.value.sessionsByDate || []
+      const todayData = sessionsByDate.find(item => item.date === todayDate.value)
+      return todayData ? todayData.sessions : 0
+    })
+
+    const currentDayMinutes = computed(() => {
+      const sessionsByDate = stats.value.sessionsByDate || []
+      const todayData = sessionsByDate.find(item => item.date === todayDate.value)
+      return todayData ? todayData.minutes : 0
     })
 
     const currentMonth = computed(() => {
-      const now = new Date()
-      return `${now.getFullYear()}年${now.getMonth() + 1}月`
+      const date = selectedMonth.value
+      return `${date.getFullYear()}年${date.getMonth() + 1}月`
     })
 
     const formatDuration = (totalMinutes) => {
@@ -177,6 +201,9 @@ export default {
       try {
         const data = await getFocusStats()
         stats.value = data
+        // 更新图表
+        updateChart()
+        updateMonthlyChart()
       } catch (error) {
         console.error('Error loading stats:', error)
       } finally {
@@ -184,9 +211,255 @@ export default {
       }
     }
 
+    // 初始化图表
+    const initChart = () => {
+      if (focusDistributionChart.value && !chartInstance.value) {
+        chartInstance.value = echarts.init(focusDistributionChart.value)
+        updateChart()
+      }
+      if (monthlyDistributionChart.value && !monthlyChartInstance.value) {
+        monthlyChartInstance.value = echarts.init(monthlyDistributionChart.value)
+        updateMonthlyChart()
+      }
+    }
+
+    // 更新图表
+    const updateChart = () => {
+      if (chartInstance.value) {
+        const sessionsByDate = stats.value.sessionsByDate || []
+        
+        // 准备图表数据 - 只显示当前选择日期的数据
+        const selectedDateStr = todayDate.value
+        const todayData = sessionsByDate.find(item => item.date === selectedDateStr)
+        
+        const dates = todayData ? [todayData.date] : [selectedDateStr]
+        const minutes = todayData ? [todayData.minutes] : [0]
+        
+        const option = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'category',
+            data: dates,
+            axisLabel: {
+              interval: 0,
+              rotate: 0
+            }
+          },
+          yAxis: {
+            type: 'value',
+            name: '专注时长（分钟）',
+            min: 0
+          },
+          series: [
+            {
+              name: '专注时长',
+              type: 'bar',
+              data: minutes,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#4fc3f7' },
+                  { offset: 1, color: '#81c784' }
+                ])
+              }
+            }
+          ]
+        }
+        
+        chartInstance.value.setOption(option)
+      }
+    }
+
+    // 更新月度图表
+    const updateMonthlyChart = () => {
+      if (monthlyChartInstance.value) {
+        const sessionsByDate = stats.value.sessionsByDate || []
+        
+        // 获取当前选择的月份
+        const selectedMonthObj = new Date(selectedMonth.value)
+        const selectedYear = selectedMonthObj.getFullYear()
+        const selectedMonthNum = selectedMonthObj.getMonth() + 1 // 月份从0开始，需要加1
+        const selectedMonthStr = `${selectedYear}-${String(selectedMonthNum).padStart(2, '0')}`
+        
+        // 过滤出当前选择月份的数据
+        const monthlyData = sessionsByDate.filter(item => {
+          return item.date.startsWith(selectedMonthStr)
+        })
+        
+        // 准备图表数据 - 只显示当前选择月份的数据
+        const dates = monthlyData.map(item => item.date)
+        const minutes = monthlyData.map(item => item.minutes)
+        
+        const option = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'category',
+            data: dates,
+            axisLabel: {
+              interval: 0,
+              rotate: 45
+            }
+          },
+          yAxis: {
+            type: 'value',
+            name: '专注时长（分钟）',
+            min: 0
+          },
+          series: [
+            {
+              name: '专注时长',
+              type: 'bar',
+              data: minutes,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#ff9800' },
+                  { offset: 1, color: '#f57c00' }
+                ])
+              }
+            }
+          ]
+        }
+        
+        monthlyChartInstance.value.setOption(option)
+      }
+    }
+
+    // 监听窗口大小变化，调整图表大小
+    const handleResize = () => {
+      if (chartInstance.value) {
+        chartInstance.value.resize()
+      }
+      if (monthlyChartInstance.value) {
+        monthlyChartInstance.value.resize()
+      }
+    }
+
+    // 日期导航
+    const prevDate = () => {
+      const newDate = new Date(selectedDate.value)
+      newDate.setDate(newDate.getDate() - 1)
+      selectedDate.value = newDate
+      // 更新图表显示对应日期的数据
+      updateChart()
+      console.log('Previous date:', selectedDate.value)
+    }
+
+    const nextDate = () => {
+      const newDate = new Date(selectedDate.value)
+      newDate.setDate(newDate.getDate() + 1)
+      selectedDate.value = newDate
+      // 更新图表显示对应日期的数据
+      updateChart()
+      console.log('Next date:', selectedDate.value)
+    }
+
+    // 月份导航
+    const prevMonth = () => {
+      const newDate = new Date(selectedMonth.value)
+      newDate.setMonth(newDate.getMonth() - 1)
+      selectedMonth.value = newDate
+      // 更新图表显示对应月份的数据
+      updateMonthlyChart()
+      console.log('Previous month:', selectedMonth.value)
+    }
+
+    const nextMonth = () => {
+      const newDate = new Date(selectedMonth.value)
+      newDate.setMonth(newDate.getMonth() + 1)
+      selectedMonth.value = newDate
+      // 更新图表显示对应月份的数据
+      updateMonthlyChart()
+      console.log('Next month:', selectedMonth.value)
+    }
+
+    // 分享功能
+    const shareStats = () => {
+      if (navigator.share) {
+        navigator.share({
+          title: '我的专注统计',
+          text: `我已经专注了${stats.value.totalSessions}次，累计${formatDuration(stats.value.totalMinutes)}，日均${formatAvgDuration(stats.value.avgMinutes)}。`,
+          url: window.location.href
+        })
+      } else {
+        // 复制到剪贴板
+        const text = `我已经专注了${stats.value.totalSessions}次，累计${formatDuration(stats.value.totalMinutes)}，日均${formatAvgDuration(stats.value.avgMinutes)}。`
+        navigator.clipboard.writeText(text).then(() => {
+          alert('分享内容已复制到剪贴板')
+        })
+      }
+    }
+
+    // 查看专注记录
+    const viewRecords = () => {
+      // 这里可以添加跳转到专注记录页面的逻辑
+      console.log('View focus records')
+      alert('查看专注记录功能开发中')
+    }
+
+    // 时间设置
+    const openTimeSettings = () => {
+      // 这里可以添加打开时间设置的逻辑
+      console.log('Open time settings')
+      alert('时间设置功能开发中')
+    }
+
+    // 成就系统
+    const viewAchievements = () => {
+      // 这里可以添加查看成就的逻辑
+      console.log('View achievements')
+      alert('成就系统功能开发中')
+    }
+
     onMounted(() => {
       loadStats()
+      // 延迟初始化图表，确保DOM已经渲染
+      setTimeout(() => {
+        initChart()
+      }, 100)
+      // 添加窗口大小变化监听
+      window.addEventListener('resize', handleResize)
     })
+
+    onUnmounted(() => {
+      // 销毁图表实例
+      if (chartInstance.value) {
+        chartInstance.value.dispose()
+        chartInstance.value = null
+      }
+      if (monthlyChartInstance.value) {
+        monthlyChartInstance.value.dispose()
+        monthlyChartInstance.value = null
+      }
+      // 移除窗口大小变化监听
+      window.removeEventListener('resize', handleResize)
+    })
+
+    // 监听sessionsByDate变化，更新图表
+    watch(() => stats.value.sessionsByDate, () => {
+      updateChart()
+      updateMonthlyChart()
+    }, { deep: true })
 
     return {
       timeTabs,
@@ -194,10 +467,22 @@ export default {
       stats,
       loading,
       todayDate,
+      currentDaySessions,
+      currentDayMinutes,
       currentMonth,
       formatDuration,
       formatAvgDuration,
-      loadStats
+      loadStats,
+      prevDate,
+      nextDate,
+      prevMonth,
+      nextMonth,
+      shareStats,
+      viewRecords,
+      openTimeSettings,
+      viewAchievements,
+      focusDistributionChart,
+      monthlyDistributionChart
     }
   }
 }
@@ -324,7 +609,8 @@ export default {
   justify-content: center;
 }
 
-.distribution-empty {
+.distribution-empty,
+.monthly-empty {
   text-align: center;
   padding: 40px 20px;
   color: #607d8b;
@@ -359,6 +645,13 @@ export default {
   justify-content: center;
   border-left: 1px solid #e0e0e0;
   padding-left: 20px;
+}
+
+/* 专注分布图表容器 */
+.chart-container {
+  width: 100%;
+  height: 300px;
+  margin: 20px 0;
 }
 
 .bar {
