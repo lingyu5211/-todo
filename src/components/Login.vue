@@ -24,58 +24,50 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
+import type { FormInstance } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { login } from '../utils/api'
+import type { User } from '../types'
 
-export default {
-  name: 'Login',
-  emits: ['login-success'],
-  setup(props, { emit }) {
-    const loginFormRef = ref(null)
-    const loading = ref(false)
-    const loginForm = reactive({
-      username: '',
-      password: ''
-    })
-    const rules = {
-      username: [
-        { required: true, message: '请输入用户名', trigger: 'blur' }
-      ],
-      password: [
-        { required: true, message: '请输入密码', trigger: 'blur' }
-      ]
-    }
+const emit = defineEmits<{
+  (e: 'login-success', user: User): void
+}>()
 
-    const handleLogin = async () => {
-      if (!loginFormRef.value) return
-      
-      try {
-        await loginFormRef.value.validate()
-        loading.value = true
-        
-        const userInfo = await login(loginForm.username, loginForm.password)
-        // 保存用户信息到本地存储
-        localStorage.setItem('userInfo', JSON.stringify(userInfo))
-        localStorage.setItem('token', userInfo.token)
-        
-        emit('login-success', userInfo)
-      } catch (error) {
-        console.error('Login error:', error)
-        ElMessage.error(error.message || '登录失败，请检查用户名和密码')
-      } finally {
-        loading.value = false
-      }
-    }
+const loginFormRef = ref<FormInstance | null>(null)
+const loading = ref(false)
+const loginForm = reactive({
+  username: '',
+  password: ''
+})
 
-    return {
-      loginFormRef,
-      loading,
-      loginForm,
-      rules,
-      handleLogin
-    }
+const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' }
+  ]
+}
+
+const handleLogin = async () => {
+  if (!loginFormRef.value) return
+  
+  try {
+    await loginFormRef.value.validate()
+    loading.value = true
+    
+    const userInfo = await login(loginForm.username, loginForm.password)
+    localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    localStorage.setItem('token', userInfo.token)
+    
+    emit('login-success', userInfo)
+  } catch (error) {
+    console.error('Login error:', error)
+    ElMessage.error(error instanceof Error ? error.message : '登录失败，请检查用户名和密码')
+  } finally {
+    loading.value = false
   }
 }
 </script>

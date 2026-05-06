@@ -1,9 +1,7 @@
 <template>
   <div class="app-container">
-    <!-- 登录界面 -->
     <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
     
-    <!-- 主要内容区域 -->
     <div v-else class="main-content">
       <TodoList v-if="activeTab === 'todo'" :active-tab="activeTab" ref="todoListRef" @start-focus="handleStartFocus" />
       <Schedule v-if="activeTab === 'schedule'" />
@@ -13,12 +11,11 @@
       <Profile v-if="activeTab === 'profile'" :user-info="userInfo" @logout="handleLogout" />
     </div>
 
-    <!-- 底部导航栏 -->
     <BottomNav v-if="isLoggedIn" :activeTab="activeTab" @changeTab="handleTabChange" />
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import TodoList from './components/TodoList.vue'
 import Schedule from './components/Schedule.vue'
@@ -29,93 +26,63 @@ import Profile from './components/Profile.vue'
 import TodoSet from './components/TodoSet.vue'
 import Login from './components/Login.vue'
 import { getCurrentUser } from './utils/api'
+import type { User, Todo } from './types'
 
-export default {
-  name: 'App',
-  components: {
-    TodoList,
-    Schedule,
-    SelfDiscipline,
-    BottomNav,
-    Stats,
-    Profile,
-    TodoSet,
-    Login
-  },
-  setup() {
-    const activeTab = ref('todo')
-    const currentFocusTodo = ref(null)
-    const isLoggedIn = ref(false)
-    const userInfo = ref(null)
-    const todoListRef = ref(null)
+const activeTab = ref<string>('todo')
+const currentFocusTodo = ref<Todo | null>(null)
+const isLoggedIn = ref<boolean>(false)
+const userInfo = ref<User | null>(null)
+const todoListRef = ref<InstanceType<typeof TodoList> | null>(null)
 
-    // 检查登录状态
-    const checkLoginStatus = async () => {
-      try {
-        const user = await getCurrentUser()
-        if (user) {
-          userInfo.value = user
-          isLoggedIn.value = true
-        } else {
-          isLoggedIn.value = false
-          userInfo.value = null
-        }
-      } catch (error) {
-        console.error('Error checking login status:', error)
-        isLoggedIn.value = false
-        userInfo.value = null
-      }
-    }
-
-    const handleTabChange = (tab) => {
-      activeTab.value = tab
-    }
-
-    const handleStartFocus = (todo) => {
-      currentFocusTodo.value = todo
-      activeTab.value = 'lock'
-    }
-
-    const handleUpdateTodo = (updatedTodo) => {
-      currentFocusTodo.value = updatedTodo
-      // 无论当前在哪个标签页，都更新TodoList组件中的待办事项
-      if (todoListRef.value) {
-        todoListRef.value.loadTodos()
-      }
-    }
-
-    const handleLoginSuccess = (user) => {
+const checkLoginStatus = async () => {
+  try {
+    const user = await getCurrentUser()
+    if (user) {
       userInfo.value = user
       isLoggedIn.value = true
-      activeTab.value = 'todo'
-    }
-
-    const handleLogout = async () => {
-      // 清除本地存储
-      localStorage.removeItem('userInfo')
-      localStorage.removeItem('token')
+    } else {
       isLoggedIn.value = false
       userInfo.value = null
     }
-
-    onMounted(() => {
-      checkLoginStatus()
-    })
-
-    return {
-      activeTab,
-      currentFocusTodo,
-      isLoggedIn,
-      userInfo,
-      todoListRef,
-      handleTabChange,
-      handleStartFocus,
-      handleUpdateTodo,
-      handleLoginSuccess,
-      handleLogout
-    }
+  } catch (error) {
+    console.error('Error checking login status:', error)
+    isLoggedIn.value = false
+    userInfo.value = null
   }
 }
+
+const handleTabChange = (tab: string) => {
+  activeTab.value = tab
+}
+
+const handleStartFocus = (todo: Todo) => {
+  currentFocusTodo.value = todo
+  activeTab.value = 'lock'
+}
+
+const handleUpdateTodo = (updatedTodo: Todo) => {
+  currentFocusTodo.value = updatedTodo
+  if (todoListRef.value) {
+    todoListRef.value.loadTodos()
+  }
+}
+
+const handleLoginSuccess = (user: User) => {
+  userInfo.value = user
+  isLoggedIn.value = true
+  activeTab.value = 'todo'
+}
+
+const handleLogout = async () => {
+  localStorage.removeItem('userInfo')
+  localStorage.removeItem('token')
+  isLoggedIn.value = false
+  userInfo.value = null
+}
+
+onMounted(() => {
+  checkLoginStatus()
+})
 </script>
 
 <style>
@@ -164,7 +131,6 @@ body {
   color: #909399;
 }
 
-/* PC端样式 */
 @media (min-width: 1024px) {
   .app-container {
     max-width: 600px;

@@ -1,6 +1,5 @@
 <template>
   <div class="profile-container">
-    <!-- 顶部背景和用户信息 -->
     <div class="profile-header">
       <img 
         src="../img/bg1.jpg" 
@@ -39,7 +38,6 @@
       </div>
     </div>
 
-    <!-- 快捷功能 -->
     <el-card class="feature-card">
       <div class="feature-grid">
         <div class="feature-item">
@@ -63,9 +61,7 @@
       </div>
     </el-card>
 
-    <!-- 设置选项列表 -->
     <div class="settings-list">
-      <!-- 季度卡 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -78,7 +74,6 @@
         </div>
       </el-card>
 
-      <!-- 备份恢复 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -90,7 +85,6 @@
         </div>
       </el-card>
 
-      <!-- 专注计时核心设置 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -103,7 +97,6 @@
         </div>
       </el-card>
 
-      <!-- 海报背景和外观 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -116,7 +109,6 @@
         </div>
       </el-card>
 
-      <!-- 自定义底栏模块 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -129,7 +121,6 @@
         </div>
       </el-card>
 
-      <!-- 主题颜色搭配 -->
       <el-card class="setting-card" @click="showThemeDialog = true">
         <div class="setting-item">
           <div class="setting-left">
@@ -145,7 +136,6 @@
         </div>
       </el-card>
 
-      <!-- 桌面小组件选项 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -158,7 +148,6 @@
         </div>
       </el-card>
 
-      <!-- 其他设置 -->
       <el-card class="setting-card">
         <div class="setting-item">
           <div class="setting-left">
@@ -171,7 +160,6 @@
       </el-card>
     </div>
 
-    <!-- 主题选择对话框 -->
     <el-dialog v-model="showThemeDialog" title="主题颜色搭配" width="90%">
       <div class="theme-grid">
         <div 
@@ -188,74 +176,61 @@
   </div>
 </template>
 
-<script>
-import { ref, onMounted, watch } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { getThemeSettings, saveThemeSettings } from '../utils/api'
+import type { User, ThemeSettings } from '../types'
 
-export default {
-  name: 'Profile',
-  props: {
-    userInfo: {
-      type: Object,
-      required: true
-    }
-  },
-  emits: ['logout'],
-  setup(props, { emit }) {
-    const showThemeDialog = ref(false)
-    
-    const themes = [
-      { id: 1, color: '#409EFF' },
-      { id: 2, color: '#67C23A' },
-      { id: 3, color: '#E6A23C' },
-      { id: 4, color: '#F56C6C' },
-      { id: 5, color: '#909399' },
-      { id: 6, color: '#9C27B0' },
-      { id: 7, color: '#00BCD4' },
-      { id: 8, color: '#FF9800' }
-    ]
-    
-    const currentTheme = ref(themes[0])
-    
-    // 加载主题设置
-    const loadThemeSettings = async () => {
-      try {
-        const data = await getThemeSettings()
-        // 找到对应的主题
-        const theme = themes.find(t => t.id === data.id) || themes[0]
-        currentTheme.value = theme
-      } catch (error) {
-        console.error('Error loading theme settings:', error)
-      }
-    }
-    
-    const selectTheme = async (theme) => {
-      currentTheme.value = theme
-      try {
-        await saveThemeSettings(theme)
-        console.log('Theme saved successfully')
-      } catch (error) {
-        console.error('Error saving theme:', error)
-      }
-    }
-    
-    const handleLogout = () => {
-      emit('logout')
-    }
-    
-    onMounted(() => {
-      loadThemeSettings()
-    })
-    
-    return {
-      showThemeDialog,
-      themes,
-      currentTheme,
-      selectTheme,
-      handleLogout
-    }
+const props = defineProps<{
+  userInfo: User
+}>()
+
+const emit = defineEmits<{
+  (e: 'logout'): void
+}>()
+
+const showThemeDialog = ref(false)
+
+const themes: ThemeSettings[] = [
+  { id: 1, color: '#409EFF' },
+  { id: 2, color: '#67C23A' },
+  { id: 3, color: '#E6A23C' },
+  { id: 4, color: '#F56C6C' },
+  { id: 5, color: '#909399' },
+  { id: 6, color: '#9C27B0' },
+  { id: 7, color: '#00BCD4' },
+  { id: 8, color: '#FF9800' }
+]
+
+const currentTheme = ref<ThemeSettings>(themes[0])
+
+const loadThemeSettings = async () => {
+  try {
+    const data = await getThemeSettings()
+    const theme = themes.find(t => t.id === data.id) || themes[0]
+    currentTheme.value = theme
+  } catch (error) {
+    console.error('Error loading theme settings:', error)
   }
 }
+
+const selectTheme = async (theme: ThemeSettings) => {
+  currentTheme.value = theme
+  try {
+    await saveThemeSettings(theme)
+    console.log('Theme saved successfully')
+  } catch (error) {
+    console.error('Error saving theme:', error)
+  }
+}
+
+const handleLogout = () => {
+  emit('logout')
+}
+
+onMounted(() => {
+  loadThemeSettings()
+})
 </script>
 
 <style scoped>
@@ -509,7 +484,6 @@ export default {
   transform: scale(1.05);
 }
 
-/* PC端样式 */
 @media (min-width: 1024px) {
   .profile-container {
     max-width: 600px;

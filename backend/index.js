@@ -6,6 +6,7 @@ const todoRoutes = require('./routes/todos');
 const eventRoutes = require('./routes/events');
 const focusSessionRoutes = require('./routes/focusSessions');
 const todoSetRoutes = require('./routes/todoSets');
+const deepseekRoutes = require('./routes/deepseek');
 
 // 加载环境变量
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/todos', todoRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/focus-sessions', focusSessionRoutes);
 app.use('/api/todo-sets', todoSetRoutes);
+app.use('/api/deepseek', deepseekRoutes);
 
 // 健康检查
 app.get('/', (req, res) => {
