@@ -8,6 +8,7 @@ interface EventAttributes {
   end: string;
   allDay: boolean;
   color: string;
+  userId?: number;
 }
 
 class Event extends Model<EventAttributes> implements EventAttributes {
@@ -17,6 +18,7 @@ class Event extends Model<EventAttributes> implements EventAttributes {
   public end!: string;
   public allDay!: boolean;
   public color!: string;
+  public userId?: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -47,6 +49,10 @@ Event.init(
     color: {
       type: DataTypes.STRING,
       defaultValue: '#409EFF',
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {

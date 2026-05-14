@@ -12,6 +12,7 @@ interface TodoAttributes {
   progress: number;
   timeInfo: string;
   todoSetId?: number;
+  userId?: number;
 }
 
 class Todo extends Model<TodoAttributes> implements TodoAttributes {
@@ -25,6 +26,7 @@ class Todo extends Model<TodoAttributes> implements TodoAttributes {
   public progress!: number;
   public timeInfo!: string;
   public todoSetId?: number;
+  public userId?: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -69,6 +71,10 @@ Todo.init(
       defaultValue: '',
     },
     todoSetId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

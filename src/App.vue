@@ -1,6 +1,11 @@
 <template>
   <div class="app-container">
-    <Login v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>加载中...</p>
+    </div>
+    
+    <Login v-else-if="!isLoggedIn" @login-success="handleLoginSuccess" />
     
     <div v-else class="main-content">
       <TodoList v-if="activeTab === 'todo'" :active-tab="activeTab" ref="todoListRef" @start-focus="handleStartFocus" />
@@ -25,21 +30,48 @@ import Stats from './components/Stats.vue'
 import Profile from './components/Profile.vue'
 import TodoSet from './components/TodoSet.vue'
 import Login from './components/Login.vue'
-import { getCurrentUser } from './utils/api'
+import { login as apiLogin } from './utils/api'
 import type { User, Todo } from './types'
+
+const API_BASE_URL = 'http://localhost:5000/api'
 
 const activeTab = ref<string>('todo')
 const currentFocusTodo = ref<Todo | null>(null)
 const isLoggedIn = ref<boolean>(false)
+const isLoading = ref<boolean>(true)
 const userInfo = ref<User | null>(null)
 const todoListRef = ref<InstanceType<typeof TodoList> | null>(null)
 
 const checkLoginStatus = async () => {
+  isLoading.value = true
   try {
-    const user = await getCurrentUser()
-    if (user) {
-      userInfo.value = user
-      isLoggedIn.value = true
+    const token = localStorage.getItem('token')
+    const savedUser = localStorage.getItem('userInfo')
+    
+    if (token && savedUser) {
+      try {
+        const user = JSON.parse(savedUser)
+        const response = await fetch(`${API_BASE_URL}/user/info`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
+        
+        if (response.ok) {
+          const freshUserInfo = await response.json()
+          userInfo.value = {
+            ...user,
+            ...freshUserInfo,
+          }
+          isLoggedIn.value = true
+        } else {
+          throw new Error('Token invalid')
+        }
+      } catch (error) {
+        console.error('Token expired or invalid:', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
+        isLoggedIn.value = false
+        userInfo.value = null
+      }
     } else {
       isLoggedIn.value = false
       userInfo.value = null
@@ -48,6 +80,8 @@ const checkLoginStatus = async () => {
     console.error('Error checking login status:', error)
     isLoggedIn.value = false
     userInfo.value = null
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -67,10 +101,26 @@ const handleUpdateTodo = (updatedTodo: Todo) => {
   }
 }
 
-const handleLoginSuccess = (user: User) => {
-  userInfo.value = user
+const handleLoginSuccess = async (user: User) => {
+  localStorage.setItem('userInfo', JSON.stringify(user))
+  localStorage.setItem('token', user.token)
+  
+  try {
+    const freshUserInfo = await getUserInfo()
+    userInfo.value = {
+      ...user,
+      ...freshUserInfo,
+    }
+  } catch (error) {
+    userInfo.value = user
+  }
+  
   isLoggedIn.value = true
   activeTab.value = 'todo'
+  
+  if (todoListRef.value) {
+    todoListRef.value.loadTodos()
+  }
 }
 
 const handleLogout = async () => {
@@ -78,6 +128,7 @@ const handleLogout = async () => {
   localStorage.removeItem('token')
   isLoggedIn.value = false
   userInfo.value = null
+  activeTab.value = 'todo'
 }
 
 onMounted(() => {
@@ -104,6 +155,36 @@ body {
   width: 100%;
   min-height: 100vh;
   position: relative;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1a1a2e 100%);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-container p {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 16px;
 }
 
 .main-content {

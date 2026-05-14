@@ -250,11 +250,13 @@ export const getFocusSessions = async (): Promise<FocusSession[]> => {
 
 export const getUserInfo = async (): Promise<Omit<User, 'token' | 'username' | 'role'>> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/info`);
+    const response = await fetch(`${API_BASE_URL}/user/info`, {
+      headers: { ...getAuthHeader() },
+    });
     return await handleResponse<Omit<User, 'token' | 'username' | 'role'>>(response);
   } catch (error) {
     console.error('Error fetching user info:', error);
-    return { name: '嗨寻', motto: '钱是第一驱动力', totalFocusDays: 14, consecutiveFocusDays: 1, avatar: '🌙' };
+    throw error;
   }
 };
 
@@ -301,35 +303,49 @@ export const saveThemeSettings = async (themeData: { id: number; color: string }
 
 export const login = async (username: string, password: string): Promise<User> => {
   try {
-    if (username === 'user' && password === '123456') {
-      return {
-        id: 1,
-        username: 'user',
-        role: 'user',
-        name: '嗨寻',
-        motto: '钱是第一驱动力',
-        totalFocusDays: 14,
-        consecutiveFocusDays: 1,
-        avatar: '🌙',
-        token: 'mock-token-user',
-      };
-    } else if (username === 'admin' && password === '123456') {
-      return {
-        id: 2,
-        username: 'admin',
-        role: 'admin',
-        name: '管理员',
-        motto: '管理是一种责任',
-        totalFocusDays: 30,
-        consecutiveFocusDays: 7,
-        avatar: '👑',
-        token: 'mock-token-admin',
-      };
-    } else {
-      throw new Error('用户名或密码错误');
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || '登录失败');
     }
+
+    return await handleResponse<User>(response);
   } catch (error) {
     console.error('Login error:', error);
+    throw error;
+  }
+};
+
+export const register = async (data: {
+  username: string;
+  password: string;
+  name: string;
+  email: string;
+}): Promise<User> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || '注册失败');
+    }
+
+    return await handleResponse<User>(response);
+  } catch (error) {
+    console.error('Register error:', error);
     throw error;
   }
 };

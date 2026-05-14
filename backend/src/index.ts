@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize from './config/db';
@@ -6,79 +6,378 @@ import Todo from './models/Todo';
 import Event from './models/Event';
 import FocusSession from './models/FocusSession';
 import TodoSet from './models/TodoSet';
+import User from './models/User';
 import https from 'https';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 app.use(cors());
 app.use(express.json());
 
 let useDatabase = false;
 
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+    username: string;
+    role: 'user' | 'admin';
+  };
+}
+
+const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: '访问被拒绝，需要登录' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) {
+      return res.status(403).json({ error: '无效的 token' });
+    }
+    (req as AuthenticatedRequest).user = user;
+    next();
+  });
+};
+
 const initDatabase = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
     console.log('Database connected successfully');
     await sequelize.sync({ force: false });
+    await initDefaultUsers();
+    await migrateLegacyData();
     useDatabase = true;
-  } catch {
+  } catch (error: any) {
+    console.error('Database connection error:', error.message);
     console.log('Database connection failed, running in mock mode');
     useDatabase = false;
   }
 };
 
-app.get('/api/user/info', (req: Request, res: Response) => {
-  res.json({
-    name: '嗨寻',
-    motto: '钱是第一驱动力',
-    totalFocusDays: 14,
-    consecutiveFocusDays: 1,
-    avatar: '🌙'
-  });
-});
+const initDefaultUsers = async (): Promise<void> => {
+  const existingUser = await User.findOne({ where: { username: 'user' } });
+  if (!existingUser) {
+    const hashedPassword = await bcrypt.hash('123456', 10);
+    await User.create({
+      username: 'user',
+      password: hashedPassword,
+      role: 'user',
+      name: '嗨寻',
+      email: 'user@example.com',
+      motto: '钱是第一驱动力',
+      totalFocusDays: 14,
+      consecutiveFocusDays: 1,
+      avatar: '🌙',
+    } as any);
+    console.log('Default user created');
+  }
 
-app.patch('/api/user/info', (req: Request, res: Response) => {
-  res.json({ ...req.body });
-});
+  const existingAdmin = await User.findOne({ where: { username: 'admin' } });
+  if (!existingAdmin) {
+    const hashedPassword = await bcrypt.hash('123456', 10);
+    await User.create({
+      username: 'admin',
+      password: hashedPassword,
+      role: 'admin',
+      name: '管理员',
+      email: 'admin@example.com',
+      motto: '管理是一种责任',
+      totalFocusDays: 30,
+      consecutiveFocusDays: 7,
+      avatar: '👑',
+    } as any);
+    console.log('Default admin created');
+  }
+};
 
-app.get('/api/user/theme', (req: Request, res: Response) => {
-  res.json({ id: 1, color: '#409EFF' });
-});
+const migrateLegacyData = async (): Promise<void> => {
+  const admin = await User.findOne({ where: { username: 'admin' } });
+  if (!admin) return;
 
-app.post('/api/user/theme', (req: Request, res: Response) => {
-  res.json(req.body);
-});
+  const adminId = admin.id;
 
-app.post('/api/auth/logout', (req: Request, res: Response) => {
-  res.json({ success: true });
-});
+  const todosWithoutUser = await Todo.findAll({ where: { userId: null as any } });
+  if (todosWithoutUser.length > 0) {
+    for (const todo of todosWithoutUser) {
+      await todo.update({ userId: adminId });
+    }
+    console.log(`Migrated ${todosWithoutUser.length} todos to admin`);
+  }
 
-app.get('/api/todos', async (req: Request, res: Response) => {
+  const eventsWithoutUser = await Event.findAll({ where: { userId: null as any } });
+  if (eventsWithoutUser.length > 0) {
+    for (const event of eventsWithoutUser) {
+      await event.update({ userId: adminId });
+    }
+    console.log(`Migrated ${eventsWithoutUser.length} events to admin`);
+  }
+
+  const sessionsWithoutUser = await FocusSession.findAll({ where: { userId: null as any } });
+  if (sessionsWithoutUser.length > 0) {
+    for (const session of sessionsWithoutUser) {
+      await session.update({ userId: adminId });
+    }
+    console.log(`Migrated ${sessionsWithoutUser.length} focus sessions to admin`);
+  }
+
+  const setsWithoutUser = await TodoSet.findAll({ where: { userId: null as any } });
+  if (setsWithoutUser.length > 0) {
+    for (const set of setsWithoutUser) {
+      await set.update({ userId: adminId });
+    }
+    console.log(`Migrated ${setsWithoutUser.length} todo sets to admin`);
+  }
+};
+
+app.post('/api/auth/login', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: '用户名和密码不能为空' });
+  }
+
   if (useDatabase) {
     try {
-      const todos = await Todo.findAll({ order: [['createdAt', 'DESC']] });
-      res.json(todos);
-    } catch {
-      returnMockTodos(res);
+      const user = await User.findOne({ where: { username } });
+      if (!user) {
+        return res.status(401).json({ error: '用户名或密码错误' });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: '用户名或密码错误' });
+      }
+
+      const token = jwt.sign(
+        { id: user.id, username: user.username, role: user.role },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        email: user.email,
+        motto: user.motto,
+        totalFocusDays: user.totalFocusDays,
+        consecutiveFocusDays: user.consecutiveFocusDays,
+        avatar: user.avatar,
+        token,
+      });
+      return;
+    } catch (error) {
+      console.error('Login error:', error);
     }
+  }
+
+  if (username === 'user' && password === '123456') {
+    const token = jwt.sign({ id: 1, username: 'user', role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+    res.json({
+      id: 1,
+      username: 'user',
+      role: 'user',
+      name: '嗨寻',
+      email: 'user@example.com',
+      motto: '钱是第一驱动力',
+      totalFocusDays: 14,
+      consecutiveFocusDays: 1,
+      avatar: '🌙',
+      token,
+    });
+  } else if (username === 'admin' && password === '123456') {
+    const token = jwt.sign({ id: 2, username: 'admin', role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
+    res.json({
+      id: 2,
+      username: 'admin',
+      role: 'admin',
+      name: '管理员',
+      email: 'admin@example.com',
+      motto: '管理是一种责任',
+      totalFocusDays: 30,
+      consecutiveFocusDays: 7,
+      avatar: '👑',
+      token,
+    });
   } else {
-    returnMockTodos(res);
+    res.status(401).json({ error: '用户名或密码错误' });
   }
 });
 
-function returnMockTodos(res: Response) {
+app.post('/api/auth/register', async (req: Request, res: Response) => {
+  const { username, password, name, email } = req.body;
+
+  if (!username || !password || !name || !email) {
+    return res.status(400).json({ error: '所有字段都是必填的' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: '密码长度不能少于6位' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: '邮箱格式不正确' });
+  }
+
+  if (useDatabase) {
+    try {
+      const existingUser = await User.findOne({ where: { username } });
+      if (existingUser) {
+        return res.status(409).json({ error: '用户名已存在' });
+      }
+
+      const existingEmail = await User.findOne({ where: { email } });
+      if (existingEmail) {
+        return res.status(409).json({ error: '邮箱已被注册' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        username,
+        password: hashedPassword,
+        role: 'user',
+        name,
+        email,
+        motto: '',
+        totalFocusDays: 0,
+        consecutiveFocusDays: 0,
+        avatar: '👤',
+      } as any);
+
+      const token = jwt.sign(
+        { id: user.id, username: user.username, role: user.role },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      res.status(201).json({
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        name: user.name,
+        email: user.email,
+        motto: user.motto,
+        totalFocusDays: user.totalFocusDays,
+        consecutiveFocusDays: user.consecutiveFocusDays,
+        avatar: user.avatar,
+        token,
+      });
+      return;
+    } catch (error) {
+      console.error('Register error:', error);
+      return res.status(500).json({ error: '注册失败，请稍后重试' });
+    }
+  }
+
+  res.status(503).json({ error: '数据库不可用，无法注册' });
+});
+
+app.post('/api/auth/logout', authenticateToken, (req: Request, res: Response) => {
+  res.json({ success: true });
+});
+
+app.get('/api/user/info', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+  
+  if (useDatabase && user) {
+    try {
+      const dbUser = await User.findByPk(user.id);
+      if (dbUser) {
+        res.json({
+          name: dbUser.name,
+          motto: dbUser.motto,
+          totalFocusDays: dbUser.totalFocusDays,
+          consecutiveFocusDays: dbUser.consecutiveFocusDays,
+          avatar: dbUser.avatar,
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    }
+  }
+
+  res.json({
+    name: user?.username === 'admin' ? '管理员' : '嗨寻',
+    motto: user?.username === 'admin' ? '管理是一种责任' : '钱是第一驱动力',
+    totalFocusDays: user?.username === 'admin' ? 30 : 14,
+    consecutiveFocusDays: user?.username === 'admin' ? 7 : 1,
+    avatar: user?.username === 'admin' ? '👑' : '🌙',
+  });
+});
+
+app.patch('/api/user/info', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+  
+  if (useDatabase && user) {
+    try {
+      const { name, motto, avatar } = req.body;
+      await User.update(
+        { ...(name && { name }), ...(motto && { motto }), ...(avatar && { avatar }) },
+        { where: { id: user.id } }
+      );
+      const updatedUser = await User.findByPk(user.id);
+      if (updatedUser) {
+        res.json({
+          name: updatedUser.name,
+          motto: updatedUser.motto,
+          avatar: updatedUser.avatar,
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Error updating user info:', error);
+    }
+  }
+
+  res.json({ ...req.body });
+});
+
+app.get('/api/user/theme', authenticateToken, (req: Request, res: Response) => {
+  res.json({ id: 1, color: '#409EFF' });
+});
+
+app.post('/api/user/theme', authenticateToken, (req: Request, res: Response) => {
+  res.json(req.body);
+});
+
+app.get('/api/todos', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+  
+  if (useDatabase && user) {
+    try {
+      const todos = await Todo.findAll({ 
+        where: { userId: user.id },
+        order: [['createdAt', 'DESC']] 
+      });
+      res.json(todos);
+      return;
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+    }
+  }
+
   res.json([
     { id: 1, text: '完成项目文档', completed: false, priority: 'high', createdAt: new Date(), targetMinutes: 25, currentMinutes: 0, progress: 0, timeInfo: '' },
     { id: 2, text: '学习TypeScript', completed: true, priority: 'medium', createdAt: new Date(), targetMinutes: 50, currentMinutes: 50, progress: 100, timeInfo: '' },
   ]);
-}
+});
 
-app.post('/api/todos', async (req: Request, res: Response) => {
+app.post('/api/todos', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const { text, completed = false, priority = 'medium', dueDate, todoSetId } = req.body;
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
       const todo = await Todo.create({
         text,
@@ -86,6 +385,7 @@ app.post('/api/todos', async (req: Request, res: Response) => {
         priority,
         dueDate: dueDate ? new Date(dueDate) : undefined,
         todoSetId,
+        userId: user.id,
         targetMinutes: 25,
         currentMinutes: 0,
         progress: 0,
@@ -93,8 +393,11 @@ app.post('/api/todos', async (req: Request, res: Response) => {
       } as any);
       res.json(todo);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error creating todo:', error);
+    }
   }
+
   res.json({
     id: Date.now(),
     text,
@@ -108,9 +411,11 @@ app.post('/api/todos', async (req: Request, res: Response) => {
   });
 });
 
-app.patch('/api/todos/:id', async (req: Request, res: Response) => {
+app.patch('/api/todos/:id', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const id = parseInt(req.params.id as string, 10);
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
       const { text, completed, priority, dueDate, currentMinutes, progress } = req.body;
       await Todo.update(
@@ -122,36 +427,52 @@ app.patch('/api/todos/:id', async (req: Request, res: Response) => {
           ...(currentMinutes !== undefined && { currentMinutes }),
           ...(progress !== undefined && { progress }),
         },
-        { where: { id } }
+        { where: { id, userId: user.id } }
       );
-      const todo = await Todo.findByPk(id);
+      const todo = await Todo.findOne({ where: { id, userId: user.id } });
       res.json(todo);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error updating todo:', error);
+    }
   }
+
   res.json({ id, ...req.body });
 });
 
-app.delete('/api/todos/:id', async (req: Request, res: Response) => {
+app.delete('/api/todos/:id', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const id = parseInt(req.params.id as string, 10);
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
-      await Todo.destroy({ where: { id } });
+      await Todo.destroy({ where: { id, userId: user.id } });
       res.json({ success: true, id });
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
   }
+
   res.json({ success: true, id });
 });
 
-app.get('/api/events', async (req: Request, res: Response) => {
-  if (useDatabase) {
+app.get('/api/events', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+
+  if (useDatabase && user) {
     try {
-      const events = await Event.findAll({ order: [['start', 'ASC']] });
+      const events = await Event.findAll({ 
+        where: { userId: user.id },
+        order: [['start', 'ASC']] 
+      });
       res.json(events);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
   }
+
   res.json([
     { id: 1, title: '项目会议', start: '2026-04-10T09:00:00', end: '2026-04-10T10:00:00', allDay: false, color: '#409EFF' },
     { id: 2, title: '健身', start: '2026-04-10T18:00:00', end: '2026-04-10T19:00:00', allDay: false, color: '#67C23A' },
@@ -159,59 +480,84 @@ app.get('/api/events', async (req: Request, res: Response) => {
   ]);
 });
 
-app.post('/api/events', async (req: Request, res: Response) => {
+app.post('/api/events', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const { title, start, end, allDay = false, color = '#409EFF' } = req.body;
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
-      const event = await Event.create({ title, start, end, allDay, color } as any);
+      const event = await Event.create({ title, start, end, allDay, color, userId: user.id } as any);
       res.json(event);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
   }
+
   res.json({ id: Date.now(), title, start, end, allDay, color });
 });
 
-app.delete('/api/events/:id', async (req: Request, res: Response) => {
+app.delete('/api/events/:id', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const id = parseInt(req.params.id as string, 10);
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
-      await Event.destroy({ where: { id } });
+      await Event.destroy({ where: { id, userId: user.id } });
       res.json({ success: true, id });
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
   }
+
   res.json({ success: true, id });
 });
 
-app.get('/api/focus-sessions', async (req: Request, res: Response) => {
-  if (useDatabase) {
+app.get('/api/focus-sessions', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+
+  if (useDatabase && user) {
     try {
-      const sessions = await FocusSession.findAll({ order: [['createdAt', 'DESC']] });
+      const sessions = await FocusSession.findAll({ 
+        where: { userId: user.id },
+        order: [['createdAt', 'DESC']] 
+      });
       res.json(sessions);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error fetching focus sessions:', error);
+    }
   }
+
   res.json([]);
 });
 
-app.post('/api/focus-sessions', async (req: Request, res: Response) => {
+app.post('/api/focus-sessions', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const { todoId, duration, date, startTime, endTime } = req.body;
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
-      const session = await FocusSession.create({ todoId, duration, date, startTime, endTime } as any);
+      const session = await FocusSession.create({ todoId, duration, date, startTime, endTime, userId: user.id } as any);
       res.json(session);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error creating focus session:', error);
+    }
   }
+
   res.json({ id: Date.now(), todoId, duration, date, startTime, endTime });
 });
 
-app.get('/api/focus-sessions/stats', async (req: Request, res: Response) => {
-  if (useDatabase) {
+app.get('/api/focus-sessions/stats', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+
+  if (useDatabase && user) {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const sessions = await FocusSession.findAll();
+      const sessions = await FocusSession.findAll({ where: { userId: user.id } });
       const totalSessions = sessions.length;
       const totalMinutes = sessions.reduce((sum: number, s: FocusSession) => sum + s.duration, 0);
       const todaySessions = sessions.filter((s: FocusSession) => new Date(s.date) >= today);
@@ -230,8 +576,11 @@ app.get('/api/focus-sessions/stats', async (req: Request, res: Response) => {
         focusByHour: { '9': 120, '10': 180, '11': 90, '14': 150, '15': 180, '16': 120, '19': 180, '20': 120 },
       });
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error fetching focus stats:', error);
+    }
   }
+
   res.json({
     totalSessions: 42,
     totalMinutes: 1260,
@@ -247,59 +596,82 @@ app.get('/api/focus-sessions/stats', async (req: Request, res: Response) => {
   });
 });
 
-app.get('/api/todo-sets', async (req: Request, res: Response) => {
-  if (useDatabase) {
+app.get('/api/todo-sets', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
+
+  if (useDatabase && user) {
     try {
-      const sets = await TodoSet.findAll({ order: [['createdAt', 'DESC']] });
+      const sets = await TodoSet.findAll({ 
+        where: { userId: user.id },
+        order: [['createdAt', 'DESC']] 
+      });
       res.json(sets);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error fetching todo sets:', error);
+    }
   }
+
   res.json([{ id: 1, name: '实习', description: '实习相关任务' }]);
 });
 
-app.post('/api/todo-sets', async (req: Request, res: Response) => {
+app.post('/api/todo-sets', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const { name, description = '' } = req.body;
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
-      const set = await TodoSet.create({ name, description } as any);
+      const set = await TodoSet.create({ name, description, userId: user.id } as any);
       res.json(set);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error creating todo set:', error);
+    }
   }
+
   res.json({ id: Date.now(), name, description });
 });
 
-app.patch('/api/todo-sets/:id', async (req: Request, res: Response) => {
+app.patch('/api/todo-sets/:id', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const id = parseInt(req.params.id as string, 10);
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
       const { name, description } = req.body;
       await TodoSet.update(
         { ...(name && { name }), ...(description !== undefined && { description }) },
-        { where: { id } }
+        { where: { id, userId: user.id } }
       );
-      const set = await TodoSet.findByPk(id);
+      const set = await TodoSet.findOne({ where: { id, userId: user.id } });
       res.json(set);
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error updating todo set:', error);
+    }
   }
+
   res.json({ id, ...req.body });
 });
 
-app.delete('/api/todo-sets/:id', async (req: Request, res: Response) => {
+app.delete('/api/todo-sets/:id', authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as AuthenticatedRequest).user;
   const id = parseInt(req.params.id as string, 10);
-  if (useDatabase) {
+
+  if (useDatabase && user) {
     try {
-      await TodoSet.destroy({ where: { id } });
+      await TodoSet.destroy({ where: { id, userId: user.id } });
       res.json({ message: 'Todo set deleted successfully' });
       return;
-    } catch {}
+    } catch (error) {
+      console.error('Error deleting todo set:', error);
+    }
   }
+
   res.json({ message: 'Todo set deleted successfully' });
 });
 
-app.post('/api/deepseek/analyze-todo-set', async (req: Request, res: Response) => {
+app.post('/api/deepseek/analyze-todo-set', authenticateToken, async (req: Request, res: Response) => {
   const { todoSetName, description } = req.body;
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const apiUrl = process.env.DEEPSEEK_API_URL || 'https://api.deepseek.com/v1/chat/completions';

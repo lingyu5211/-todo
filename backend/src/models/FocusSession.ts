@@ -8,6 +8,7 @@ interface FocusSessionAttributes {
   date: string;
   startTime: string;
   endTime: string;
+  userId?: number;
 }
 
 class FocusSession extends Model<FocusSessionAttributes> implements FocusSessionAttributes {
@@ -17,6 +18,7 @@ class FocusSession extends Model<FocusSessionAttributes> implements FocusSession
   public date!: string;
   public startTime!: string;
   public endTime!: string;
+  public userId?: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -47,6 +49,10 @@ FocusSession.init(
     endTime: {
       type: DataTypes.TIME,
       allowNull: false,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {

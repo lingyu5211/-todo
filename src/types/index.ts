@@ -10,6 +10,7 @@ export interface Todo {
   progress: number;
   timeInfo: string;
   todoSetId?: number;
+  userId?: number;
 }
 
 export interface Event {
@@ -21,6 +22,7 @@ export interface Event {
   color: string;
   date?: string;
   time?: string;
+  userId?: number;
 }
 
 export interface FocusSession {
@@ -31,6 +33,7 @@ export interface FocusSession {
   startTime: string;
   endTime: string;
   createdAt: string;
+  userId?: number;
 }
 
 export interface TodoSet {
@@ -38,6 +41,7 @@ export interface TodoSet {
   name: string;
   description: string;
   createdAt: string;
+  userId?: number;
 }
 
 export interface User {
@@ -45,6 +49,7 @@ export interface User {
   username: string;
   role: 'user' | 'admin';
   name: string;
+  email: string;
   motto: string;
   totalFocusDays: number;
   consecutiveFocusDays: number;

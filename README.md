@@ -7,7 +7,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-blue.svg)](https://www.mysql.com/)
 [![Sequelize](https://img.shields.io/badge/Sequelize-6.32%2B-ccc.svg)](https://sequelize.org/)
 
-***
+---
 
 ## 📋 项目概述
 
@@ -15,43 +15,43 @@
 
 ### 🎯 核心功能
 
-| 模块    | 功能                  | 状态    |
-| ----- | ------------------- | ----- |
-| 待办管理  | 待办事项增删改查、优先级管理、进度追踪 | ✅ 已完成 |
-| 日程管理  | 日程事件 CRUD、日历视图、颜色标记 | ✅ 已完成 |
-| 待办集管理 | 批量任务分组、AI 智能分析      | ✅ 已完成 |
-| 专注时钟  | Pomodoro 计时器、时间统计   | ✅ 已完成 |
-| 数据可视化 | 专注统计图表、趋势分析         | ✅ 已完成 |
-| 用户认证  | 登录状态管理              | ✅ 已完成 |
+| 模块 | 功能 | 状态 |
+|------|------|------|
+| 待办管理 | 待办事项增删改查、优先级管理、进度追踪 | ✅ 已完成 |
+| 日程管理 | 日程事件 CRUD、日历视图、颜色标记 | ✅ 已完成 |
+| 待办集管理 | 批量任务分组、AI 智能分析 | ✅ 已完成 |
+| 专注时钟 | Pomodoro 计时器、时间统计 | ✅ 已完成 |
+| 数据可视化 | 专注统计图表、趋势分析 | ✅ 已完成 |
+| 用户认证 | 登录状态管理 | ✅ 已完成 |
 
-***
+---
 
 ## 🛠️ 技术栈
 
 ### 前端技术栈
 
-| 技术           | 版本   | 说明                  |
-| ------------ | ---- | ------------------- |
-| Vue          | 3.3+ | 渐进式 JavaScript 框架   |
-| TypeScript   | 5.3+ | 类型安全的 JavaScript 超集 |
-| Element Plus | 2.4+ | Vue 3 企业级 UI 组件库    |
-| Vite         | 5.0+ | 下一代前端构建工具           |
-| ECharts      | 5.4+ | 数据可视化图表库            |
-| Vue Router   | 4.2+ | Vue 路由管理            |
+| 技术 | 版本 | 说明 |
+|------|------|------|
+| Vue | 3.3+ | 渐进式 JavaScript 框架 |
+| TypeScript | 5.3+ | 类型安全的 JavaScript 超集 |
+| Element Plus | 2.4+ | Vue 3 企业级 UI 组件库 |
+| Vite | 5.0+ | 下一代前端构建工具 |
+| ECharts | 5.4+ | 数据可视化图表库 |
+| Vue Router | 4.2+ | Vue 路由管理 |
 
 ### 后端技术栈
 
-| 技术         | 版本    | 说明             |
-| ---------- | ----- | -------------- |
-| Node.js    | 18+   | JavaScript 运行时 |
-| Express    | 4.18+ | Web 应用框架       |
-| TypeScript | 5.3+  | 类型安全开发         |
-| MySQL      | 8.0+  | 关系型数据库         |
-| Sequelize  | 6.32+ | ORM 框架         |
-| CORS       | 2.8+  | 跨域资源共享         |
-| dotenv     | 16+   | 环境变量管理         |
+| 技术 | 版本 | 说明 |
+|------|------|------|
+| Node.js | 18+ | JavaScript 运行时 |
+| Express | 4.18+ | Web 应用框架 |
+| TypeScript | 5.3+ | 类型安全开发 |
+| MySQL | 8.0+ | 关系型数据库 |
+| Sequelize | 6.32+ | ORM 框架 |
+| CORS | 2.8+ | 跨域资源共享 |
+| dotenv | 16+ | 环境变量管理 |
 
-***
+---
 
 ## 📁 项目结构
 
@@ -105,58 +105,61 @@ todo-schedule-app/
 └── README.md                            # 项目文档
 ```
 
-***
+---
 
 ## 🔄 TypeScript 重构记录
 
 ### 📅 重构时间线
 
-| 阶段   | 时间                       | 内容                         |
-| ---- | ------------------------ | -------------------------- |
-| 规划阶段 | 2026-04-01               | 分析现有代码结构，制定重构计划            |
-| 前端重构 | 2026-04-02 \~ 2026-04-05 | 前端 JavaScript → TypeScript |
-| 后端重构 | 2026-04-06 \~ 2026-04-10 | 后端 JavaScript → TypeScript |
-| 类型定义 | 2026-04-11 \~ 2026-04-12 | 完善类型系统                     |
-| 测试验证 | 2026-04-13 \~ 2026-04-15 | 类型检查、编译验证、功能测试             |
-| 文档更新 | 2026-04-16               | 更新技术文档                     |
+| 阶段 | 时间 | 内容 |
+|------|------|------|
+| 规划阶段 | 2026-04-01 | 分析现有代码结构，制定重构计划 |
+| 前端重构 | 2026-04-02 ~ 2026-04-05 | 前端 JavaScript → TypeScript |
+| 后端重构 | 2026-04-06 ~ 2026-04-10 | 后端 JavaScript → TypeScript |
+| 类型定义 | 2026-04-11 ~ 2026-04-12 | 完善类型系统 |
+| 测试验证 | 2026-04-13 ~ 2026-04-15 | 类型检查、编译验证、功能测试 |
+| 文档更新 | 2026-04-16 | 更新技术文档 |
 
 ### ✅ 重构成果
 
-| 维度       | 重构前     | 重构后       |
-| -------- | ------- | --------- |
-| **类型安全** | 无类型检查   | 完整类型推断与约束 |
-| **代码提示** | 基本无     | 智能 IDE 提示 |
-| **错误发现** | 运行时     | 编译时发现     |
-| **可维护性** | 依赖开发者经验 | 类型即文档     |
-| **开发效率** | 中等      | 大幅提升      |
-| **代码质量** | 依赖代码审查  | 编译器保障     |
+| 维度 | 重构前 | 重构后 |
+|------|--------|--------|
+| **类型安全** | 无类型检查 | 完整类型推断与约束 |
+| **代码提示** | 基本无 | 智能 IDE 提示 |
+| **错误发现** | 运行时 | 编译时发现 |
+| **可维护性** | 依赖开发者经验 | 类型即文档 |
+| **开发效率** | 中等 | 大幅提升 |
+| **代码质量** | 依赖代码审查 | 编译器保障 |
 
 ### 🔧 重构关键点
 
 1. **类型定义统一**
    - 前端：`src/types/index.ts`
    - 后端：`backend/src/types/index.ts`
+
 2. **组件 TypeScript 化**
    - 使用 `defineProps<Props>()` 和 `defineEmits<Emits>()`
    - 添加响应式状态类型注解
+
 3. **API 层类型安全**
    - 定义请求/响应接口
    - 统一错误处理类型
+
 4. **数据库模型类型**
    - Sequelize 模型添加泛型类型
    - 定义属性接口
 
-***
+---
 
 ## 🚀 快速开始
 
 ### 1. 环境要求
 
-| 依赖      | 版本        | 说明             |
-| ------- | --------- | -------------- |
+| 依赖 | 版本 | 说明 |
+|------|------|------|
 | Node.js | >= 18.0.0 | JavaScript 运行时 |
-| MySQL   | >= 8.0.0  | 关系型数据库         |
-| npm     | >= 9.0.0  | 包管理器           |
+| MySQL | >= 8.0.0 | 关系型数据库 |
+| npm | >= 9.0.0 | 包管理器 |
 
 ### 2. 安装依赖
 
@@ -215,23 +218,23 @@ npm run build
 
 ### 6. 访问应用
 
-| 服务     | 地址                      | 说明             |
-| ------ | ----------------------- | -------------- |
-| 前端应用   | <http://localhost:5173> | Vue 开发服务器      |
-| 后端 API | <http://localhost:5000> | Express API 服务 |
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| 前端应用 | http://localhost:5173 | Vue 开发服务器 |
+| 后端 API | http://localhost:5000 | Express API 服务 |
 
-***
+---
 
 ## 📡 API 接口文档
 
 ### 待办事项 API
 
-| 方法     | 路径               | 描述       | 认证 |
-| ------ | ---------------- | -------- | -- |
-| GET    | `/api/todos`     | 获取所有待办事项 | 否  |
-| POST   | `/api/todos`     | 创建新待办事项  | 否  |
-| PATCH  | `/api/todos/:id` | 更新待办事项   | 否  |
-| DELETE | `/api/todos/:id` | 删除待办事项   | 否  |
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| GET | `/api/todos` | 获取所有待办事项 | 否 |
+| POST | `/api/todos` | 创建新待办事项 | 否 |
+| PATCH | `/api/todos/:id` | 更新待办事项 | 否 |
+| DELETE | `/api/todos/:id` | 删除待办事项 | 否 |
 
 **POST 请求体示例：**
 
@@ -246,88 +249,88 @@ npm run build
 
 ### 日程事件 API
 
-| 方法     | 路径                | 描述       | 认证 |
-| ------ | ----------------- | -------- | -- |
-| GET    | `/api/events`     | 获取所有日程事件 | 否  |
-| POST   | `/api/events`     | 创建新日程事件  | 否  |
-| DELETE | `/api/events/:id` | 删除日程事件   | 否  |
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| GET | `/api/events` | 获取所有日程事件 | 否 |
+| POST | `/api/events` | 创建新日程事件 | 否 |
+| DELETE | `/api/events/:id` | 删除日程事件 | 否 |
 
 ### 专注会话 API
 
-| 方法   | 路径                          | 描述       | 认证 |
-| ---- | --------------------------- | -------- | -- |
-| GET  | `/api/focus-sessions`       | 获取所有专注会话 | 否  |
-| POST | `/api/focus-sessions`       | 创建专注会话   | 否  |
-| GET  | `/api/focus-sessions/stats` | 获取专注统计   | 否  |
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| GET | `/api/focus-sessions` | 获取所有专注会话 | 否 |
+| POST | `/api/focus-sessions` | 创建专注会话 | 否 |
+| GET | `/api/focus-sessions/stats` | 获取专注统计 | 否 |
 
 ### 待办集 API
 
-| 方法     | 路径                   | 描述      | 认证 |
-| ------ | -------------------- | ------- | -- |
-| GET    | `/api/todo-sets`     | 获取所有待办集 | 否  |
-| POST   | `/api/todo-sets`     | 创建待办集   | 否  |
-| PATCH  | `/api/todo-sets/:id` | 更新待办集   | 否  |
-| DELETE | `/api/todo-sets/:id` | 删除待办集   | 否  |
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| GET | `/api/todo-sets` | 获取所有待办集 | 否 |
+| POST | `/api/todo-sets` | 创建待办集 | 否 |
+| PATCH | `/api/todo-sets/:id` | 更新待办集 | 否 |
+| DELETE | `/api/todo-sets/:id` | 删除待办集 | 否 |
 
 ### AI 分析 API
 
-| 方法   | 路径                               | 描述       | 认证 |
-| ---- | -------------------------------- | -------- | -- |
-| POST | `/api/deepseek/analyze-todo-set` | AI 分析待办集 | 否  |
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| POST | `/api/deepseek/analyze-todo-set` | AI 分析待办集 | 否 |
 
-***
+---
 
 ## 🗄️ 数据库设计
 
 ### Todo 表（待办事项）
 
-| 字段             | 类型          | 约束                           | 说明       |
-| -------------- | ----------- | ---------------------------- | -------- |
-| id             | INT         | PRIMARY KEY, AUTO\_INCREMENT | 主键       |
-| text           | TEXT        | NOT NULL                     | 待办内容     |
-| completed      | BOOLEAN     | DEFAULT FALSE                | 是否完成     |
-| priority       | VARCHAR(20) | DEFAULT 'medium'             | 优先级      |
-| dueDate        | DATETIME    | NULL                         | 截止日期     |
-| targetMinutes  | INT         | DEFAULT 25                   | 目标时长(分钟) |
-| currentMinutes | INT         | DEFAULT 0                    | 当前时长(分钟) |
-| progress       | INT         | DEFAULT 0                    | 进度百分比    |
-| timeInfo       | VARCHAR(50) | DEFAULT ''                   | 时间信息     |
-| todoSetId      | INT         | NULL                         | 待办集外键    |
-| createdAt      | DATETIME    | <br />                       | 创建时间     |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INT | PRIMARY KEY, AUTO_INCREMENT | 主键 |
+| text | TEXT | NOT NULL | 待办内容 |
+| completed | BOOLEAN | DEFAULT FALSE | 是否完成 |
+| priority | VARCHAR(20) | DEFAULT 'medium' | 优先级 |
+| dueDate | DATETIME | NULL | 截止日期 |
+| targetMinutes | INT | DEFAULT 25 | 目标时长(分钟) |
+| currentMinutes | INT | DEFAULT 0 | 当前时长(分钟) |
+| progress | INT | DEFAULT 0 | 进度百分比 |
+| timeInfo | VARCHAR(50) | DEFAULT '' | 时间信息 |
+| todoSetId | INT | NULL | 待办集外键 |
+| createdAt | DATETIME | | 创建时间 |
 
 ### Event 表（日程事件）
 
-| 字段     | 类型           | 约束                           | 说明   |
-| ------ | ------------ | ---------------------------- | ---- |
-| id     | INT          | PRIMARY KEY, AUTO\_INCREMENT | 主键   |
-| title  | VARCHAR(255) | NOT NULL                     | 事件标题 |
-| start  | DATETIME     | NOT NULL                     | 开始时间 |
-| end    | DATETIME     | NOT NULL                     | 结束时间 |
-| allDay | BOOLEAN      | DEFAULT FALSE                | 全天事件 |
-| color  | VARCHAR(20)  | DEFAULT '#409EFF'            | 颜色标记 |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INT | PRIMARY KEY, AUTO_INCREMENT | 主键 |
+| title | VARCHAR(255) | NOT NULL | 事件标题 |
+| start | DATETIME | NOT NULL | 开始时间 |
+| end | DATETIME | NOT NULL | 结束时间 |
+| allDay | BOOLEAN | DEFAULT FALSE | 全天事件 |
+| color | VARCHAR(20) | DEFAULT '#409EFF' | 颜色标记 |
 
 ### FocusSession 表（专注会话）
 
-| 字段        | 类型       | 约束                           | 说明   |
-| --------- | -------- | ---------------------------- | ---- |
-| id        | INT      | PRIMARY KEY, AUTO\_INCREMENT | 主键   |
-| todoId    | INT      | NOT NULL                     | 关联待办 |
-| duration  | INT      | NOT NULL                     | 专注时长 |
-| date      | DATE     | NOT NULL                     | 专注日期 |
-| startTime | TIME     | NOT NULL                     | 开始时间 |
-| endTime   | TIME     | NOT NULL                     | 结束时间 |
-| createdAt | DATETIME | <br />                       | 创建时间 |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INT | PRIMARY KEY, AUTO_INCREMENT | 主键 |
+| todoId | INT | NOT NULL | 关联待办 |
+| duration | INT | NOT NULL | 专注时长 |
+| date | DATE | NOT NULL | 专注日期 |
+| startTime | TIME | NOT NULL | 开始时间 |
+| endTime | TIME | NOT NULL | 结束时间 |
+| createdAt | DATETIME | | 创建时间 |
 
 ### TodoSet 表（待办集）
 
-| 字段          | 类型           | 约束                           | 说明    |
-| ----------- | ------------ | ---------------------------- | ----- |
-| id          | INT          | PRIMARY KEY, AUTO\_INCREMENT | 主键    |
-| name        | VARCHAR(255) | NOT NULL                     | 待办集名称 |
-| description | TEXT         | NULL                         | 描述    |
-| createdAt   | DATETIME     | <br />                       | 创建时间  |
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INT | PRIMARY KEY, AUTO_INCREMENT | 主键 |
+| name | VARCHAR(255) | NOT NULL | 待办集名称 |
+| description | TEXT | NULL | 描述 |
+| createdAt | DATETIME | | 创建时间 |
 
-***
+---
 
 ## 🔧 开发指南
 
@@ -361,14 +364,14 @@ function fetchTodos(): Promise<Todo[]> {
 
 ### 代码审查要点
 
-| 检查项   | 说明                                   |
-| ----- | ------------------------------------ |
-| 类型完整性 | 所有变量、函数、组件都应有明确类型                    |
-| 接口一致性 | 前后端接口类型保持一致                          |
-| 错误处理  | Promise 必须有 `.catch()` 或 try-catch   |
-| 命名规范  | 使用 PascalCase（类/接口）、camelCase（变量/函数） |
+| 检查项 | 说明 |
+|--------|------|
+| 类型完整性 | 所有变量、函数、组件都应有明确类型 |
+| 接口一致性 | 前后端接口类型保持一致 |
+| 错误处理 | Promise 必须有 `.catch()` 或 try-catch |
+| 命名规范 | 使用 PascalCase（类/接口）、camelCase（变量/函数） |
 
-***
+---
 
 ## 🛡️ 安全最佳实践
 
@@ -385,7 +388,7 @@ function fetchTodos(): Promise<Todo[]> {
 2. **CSRF 防护**：考虑添加 CSRF token
 3. **敏感数据处理**：不在前端存储敏感信息
 
-***
+---
 
 ## 📊 性能优化
 
@@ -401,7 +404,7 @@ function fetchTodos(): Promise<Todo[]> {
 2. **缓存策略**：合理使用 HTTP 缓存
 3. **懒加载**：组件和图片懒加载
 
-***
+---
 
 ## 🧪 测试策略
 
@@ -419,7 +422,7 @@ function fetchTodos(): Promise<Todo[]> {
 
 - 使用 Cypress 进行端到端测试
 
-***
+---
 
 ## 🚢 部署方案
 
@@ -464,7 +467,7 @@ EXPOSE 5000
 CMD ["node", "dist/index.js"]
 ```
 
-***
+---
 
 ## 🔄 CI/CD 流程
 
@@ -502,20 +505,20 @@ jobs:
       run: cd backend && npm ci && npm run build
 ```
 
-***
+---
 
 ## 📈 版本历史
 
-| 版本         | 日期            | 变更内容                    |
-| ---------- | ------------- | ----------------------- |
-| v1.0.0     | 2026-03-01    | 初始版本，使用 localStorage 存储 |
-| v2.0.0     | 2026-03-15    | 迁移到 Node.js + MySQL 后端  |
-| v3.0.0     | 2026-03-30    | 添加待办集、专注时钟、统计功能         |
-| v3.1.0     | 2026-04-01    | 添加 AI 辅助分析功能            |
-| **v4.0.0** | **2026-05-5** | **TypeScript 全面重构**     |
-| v4.0.1     | 2026-05-6     | 修复数据库连接问题               |
+| 版本 | 日期 | 变更内容 |
+|------|------|----------|
+| v1.0.0 | 2026-03-01 | 初始版本，使用 localStorage 存储 |
+| v2.0.0 | 2026-03-15 | 迁移到 Node.js + MySQL 后端 |
+| v3.0.0 | 2026-03-30 | 添加待办集、专注时钟、统计功能 |
+| v3.1.0 | 2026-04-01 | 添加 AI 辅助分析功能 |
+| **v4.0.0** | **2026-04-15** | **TypeScript 全面重构** |
+| v4.0.1 | 2026-04-16 | 修复数据库连接问题 |
 
-***
+---
 
 ## 🤝 贡献指南
 
@@ -541,7 +544,7 @@ jobs:
 4. 发起 Pull Request
 5. 代码审查通过后合并
 
-***
+---
 
 ## 📞 支持与反馈
 
@@ -550,12 +553,12 @@ jobs:
 - **Issue 报告**：在 GitHub 仓库提交 Issue
 - **技术讨论**：通过项目讨论区交流
 
-***
+---
 
 ## 📄 许可证
 
-该项目无 LICENSE 文件
+MIT License - 详见 LICENSE 文件
 
-***
+---
 
 *文档最后更新：2026-05-06*
