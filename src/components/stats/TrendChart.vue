@@ -36,18 +36,24 @@ const periodLabels: Record<string, string> = { day: '日', week: '周', month: '
 const { chartRef, initChart, setChartOption, dispose } = useChart()
 
 const filteredData = computed(() => {
-  const now = new Date()
+  if (!Array.isArray(props.data) || props.data.length === 0) return []
+  const sorted = [...props.data].sort((a, b) => b.date.localeCompare(a.date))
+  const latestDate = sorted[0].date
   if (props.period === 'day') {
-    const today = now.toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0]
     return props.data.filter(d => d.date === today)
   }
   if (props.period === 'week') {
-    const weekAgo = new Date(now)
-    weekAgo.setDate(weekAgo.getDate() - 6)
-    return props.data.filter(d => d.date >= weekAgo.toISOString().split('T')[0])
+    const endDate = new Date(latestDate)
+    const startDate = new Date(endDate)
+    startDate.setDate(startDate.getDate() - 6)
+    return props.data.filter(
+      d => d.date >= startDate.toISOString().split('T')[0] &&
+           d.date <= endDate.toISOString().split('T')[0]
+    )
   }
   if (props.period === 'month') {
-    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const prefix = latestDate.substring(0, 7)
     return props.data.filter(d => d.date.startsWith(prefix))
   }
   return props.data
