@@ -12,7 +12,7 @@
       <Schedule v-if="activeTab === 'schedule'" />
       <TodoSet v-if="activeTab === 'todoSet'" @start-focus="handleStartFocus" />
       <SelfDiscipline v-if="activeTab === 'lock'" :focus-todo="currentFocusTodo" @update:todo="handleUpdateTodo" />
-      <Stats v-if="activeTab === 'stats'" />
+      <StatsDashboard v-if="activeTab === 'stats'" />
       <Profile v-if="activeTab === 'profile'" :user-info="userInfo" @logout="handleLogout" />
     </div>
 
@@ -26,7 +26,7 @@ import TodoList from './components/TodoList.vue'
 import Schedule from './components/Schedule.vue'
 import SelfDiscipline from './components/SelfDiscipline.vue'
 import BottomNav from './components/BottomNav.vue'
-import Stats from './components/Stats.vue'
+import StatsDashboard from './components/stats/StatsDashboard.vue'
 import Profile from './components/Profile.vue'
 import TodoSet from './components/TodoSet.vue'
 import Login from './components/Login.vue'
