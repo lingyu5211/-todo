@@ -68,12 +68,14 @@ export interface FocusStats {
   avgMinutes: number;
   todaySessions: number;
   todayMinutes: number;
-  weeklySessions: number;
-  weeklyMinutes: number;
-  monthlySessions: number;
-  monthlyMinutes: number;
+  sessionsByDate: SessionByDate[];
   focusByCategory: Record<string, number>;
-  focusByHour: Record<string, number>;
+}
+
+export interface SessionByDate {
+  date: string;
+  sessions: number;
+  minutes: number;
 }
 
 export interface SubTask {
