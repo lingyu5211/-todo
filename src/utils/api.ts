@@ -204,17 +204,13 @@ export const getFocusStats = async (): Promise<FocusStats> => {
   } catch (error) {
     console.error('Error fetching focus stats:', error);
     return {
-      totalSessions: 42,
-      totalMinutes: 1260,
-      avgMinutes: 30,
-      todaySessions: 3,
-      todayMinutes: 180,
-      weeklySessions: 15,
-      weeklyMinutes: 900,
-      monthlySessions: 60,
-      monthlyMinutes: 3600,
-      focusByCategory: { work: 720, study: 360, health: 180 },
-      focusByHour: { '9': 120, '10': 180, '11': 90, '14': 150, '15': 180, '16': 120, '19': 180, '20': 120 },
+      totalSessions: 0,
+      totalMinutes: 0,
+      avgMinutes: 0,
+      todaySessions: 0,
+      todayMinutes: 0,
+      sessionsByDate: [],
+      focusByCategory: {},
     };
   }
 };
