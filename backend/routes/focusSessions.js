@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const FocusSession = require('../models/FocusSession');
+const Todo = require('../models/Todo');
+const TodoSet = require('../models/TodoSet');
 
 // 获取所有专注记录
 router.get('/', async (req, res) => {
@@ -37,58 +39,64 @@ router.post('/', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const allSessions = await FocusSession.findAll();
-    
-    // 计算总专注时间
-    const totalMinutes = allSessions.reduce((sum, session) => sum + session.duration, 0);
-    
-    // 计算总专注次数
+
+    const totalMinutes = allSessions.reduce((sum, s) => sum + s.duration, 0);
     const totalSessions = allSessions.length;
-    
-    // 计算日均专注时间（假设最近30天）
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentSessions = allSessions.filter(session => 
-      new Date(session.startTime) >= thirtyDaysAgo
+    const recentSessions = allSessions.filter(s =>
+      new Date(s.startTime) >= thirtyDaysAgo
     );
-    const recentMinutes = recentSessions.reduce((sum, session) => sum + session.duration, 0);
+    const recentMinutes = recentSessions.reduce((sum, s) => sum + s.duration, 0);
     const avgMinutes = Math.round(recentMinutes / 30);
-    
-    // 计算今日专注时间
+
     const today = new Date().toISOString().split('T')[0];
-    
-    // 尝试从date字段中匹配今天的日期
-    const todaySessions = allSessions.filter(session => {
-      // 直接使用date字段的值进行匹配
-      return session.date === today;
-    });
-    
-    let todayMinutes = todaySessions.reduce((sum, session) => sum + session.duration, 0);
-    
-    // 按日期分组，用于前端图表显示
-    const sessionsByDate = allSessions.reduce((acc, session) => {
+    const todaySessions = allSessions.filter(s => s.date === today);
+    const todayMinutes = todaySessions.reduce((sum, s) => sum + s.duration, 0);
+
+    // sessionsByDate aggregation
+    const sessionsByDateMap = allSessions.reduce((acc, session) => {
       const date = session.date;
       if (!acc[date]) {
-        acc[date] = {
-          date: date,
-          sessions: 0,
-          minutes: 0
-        };
+        acc[date] = { date, sessions: 0, minutes: 0 };
       }
       acc[date].sessions++;
       acc[date].minutes += session.duration;
       return acc;
     }, {});
-    
-    // 转换为数组格式
-    const sessionsByDateArray = Object.values(sessionsByDate);
-    
+    const sessionsByDate = Object.values(sessionsByDateMap);
+
+    // focusByCategory: join focus_sessions → todos → todo_sets
+    const focusByCategory = {};
+    for (const session of allSessions) {
+      if (session.todoId) {
+        const todo = await Todo.findByPk(session.todoId);
+        if (todo && todo.todoSetId) {
+          const todoSet = await TodoSet.findByPk(todo.todoSetId);
+          if (todoSet) {
+            const name = todoSet.name;
+            focusByCategory[name] = (focusByCategory[name] || 0) + session.duration;
+          }
+        }
+      }
+    }
+    // Unassigned category for sessions without todoSet
+    const unassignedMinutes = allSessions
+      .filter(s => !s.todoId)
+      .reduce((sum, s) => sum + s.duration, 0);
+    if (unassignedMinutes > 0) {
+      focusByCategory['未分类'] = (focusByCategory['未分类'] || 0) + unassignedMinutes;
+    }
+
     res.json({
       totalSessions,
       totalMinutes,
       avgMinutes,
       todaySessions: todaySessions.length,
       todayMinutes,
-      sessionsByDate: sessionsByDateArray
+      sessionsByDate,
+      focusByCategory,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
