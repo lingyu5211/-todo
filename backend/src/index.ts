@@ -555,25 +555,64 @@ app.get('/api/focus-sessions/stats', authenticateToken, async (req: Request, res
 
   if (useDatabase && user) {
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
       const sessions = await FocusSession.findAll({ where: { userId: user.id } });
       const totalSessions = sessions.length;
       const totalMinutes = sessions.reduce((sum: number, s: FocusSession) => sum + s.duration, 0);
-      const todaySessions = sessions.filter((s: FocusSession) => new Date(s.date) >= today);
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentSessions = sessions.filter((s: FocusSession) => new Date(s.startTime) >= thirtyDaysAgo);
+      const recentMinutes = recentSessions.reduce((sum: number, s: FocusSession) => sum + s.duration, 0);
+      const avgMinutes = Math.round(recentMinutes / 30);
+
+      const today = new Date().toISOString().split('T')[0];
+      const todaySessions = sessions.filter((s: FocusSession) => s.date === today);
       const todayMinutes = todaySessions.reduce((sum: number, s: FocusSession) => sum + s.duration, 0);
+
+      // sessionsByDate aggregation
+      const sessionsByDateMap: Record<string, { date: string; sessions: number; minutes: number }> = {};
+      for (const s of sessions) {
+        const d = s.date;
+        if (!sessionsByDateMap[d]) {
+          sessionsByDateMap[d] = { date: d, sessions: 0, minutes: 0 };
+        }
+        sessionsByDateMap[d].sessions++;
+        sessionsByDateMap[d].minutes += s.duration;
+      }
+      const sessionsByDate = Object.values(sessionsByDateMap);
+
+      // focusByCategory: join focus_sessions → todos → todo_sets
+      const focusByCategory: Record<string, number> = {};
+      let unassignedMinutes = 0;
+      for (const s of sessions) {
+        let categorized = false;
+        if (s.todoId) {
+          const todo = await Todo.findByPk(s.todoId);
+          if (todo && (todo as any).todoSetId) {
+            const todoSet = await TodoSet.findByPk((todo as any).todoSetId);
+            if (todoSet) {
+              const name = todoSet.name;
+              focusByCategory[name] = (focusByCategory[name] || 0) + s.duration;
+              categorized = true;
+            }
+          }
+        }
+        if (!categorized) {
+          unassignedMinutes += s.duration;
+        }
+      }
+      if (unassignedMinutes > 0) {
+        focusByCategory['未分类'] = (focusByCategory['未分类'] || 0) + unassignedMinutes;
+      }
+
       res.json({
         totalSessions,
         totalMinutes,
-        avgMinutes: totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0,
+        avgMinutes,
         todaySessions: todaySessions.length,
         todayMinutes,
-        weeklySessions: 15,
-        weeklyMinutes: 900,
-        monthlySessions: 60,
-        monthlyMinutes: 3600,
-        focusByCategory: { work: 720, study: 360, health: 180 },
-        focusByHour: { '9': 120, '10': 180, '11': 90, '14': 150, '15': 180, '16': 120, '19': 180, '20': 120 },
+        sessionsByDate,
+        focusByCategory,
       });
       return;
     } catch (error) {
@@ -582,17 +621,13 @@ app.get('/api/focus-sessions/stats', authenticateToken, async (req: Request, res
   }
 
   res.json({
-    totalSessions: 42,
-    totalMinutes: 1260,
-    avgMinutes: 30,
-    todaySessions: 3,
-    todayMinutes: 180,
-    weeklySessions: 15,
-    weeklyMinutes: 900,
-    monthlySessions: 60,
-    monthlyMinutes: 3600,
-    focusByCategory: { work: 720, study: 360, health: 180 },
-    focusByHour: { '9': 120, '10': 180, '11': 90, '14': 150, '15': 180, '16': 120, '19': 180, '20': 120 },
+    totalSessions: 0,
+    totalMinutes: 0,
+    avgMinutes: 0,
+    todaySessions: 0,
+    todayMinutes: 0,
+    sessionsByDate: [],
+    focusByCategory: {},
   });
 });
 
