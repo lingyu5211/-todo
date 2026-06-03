@@ -375,7 +375,7 @@ app.get('/api/todos', authenticateToken, async (req: Request, res: Response) => 
 
 app.post('/api/todos', authenticateToken, async (req: Request, res: Response) => {
   const user = (req as AuthenticatedRequest).user;
-  const { text, completed = false, priority = 'medium', dueDate, todoSetId } = req.body;
+  const { text, completed = false, priority = 'medium', dueDate, todoSetId, targetMinutes, currentMinutes, progress, timeInfo } = req.body;
 
   if (useDatabase && user) {
     try {
@@ -386,10 +386,10 @@ app.post('/api/todos', authenticateToken, async (req: Request, res: Response) =>
         dueDate: dueDate ? new Date(dueDate) : undefined,
         todoSetId,
         userId: user.id,
-        targetMinutes: 25,
-        currentMinutes: 0,
-        progress: 0,
-        timeInfo: '',
+        targetMinutes: targetMinutes ?? 25,
+        currentMinutes: currentMinutes ?? 0,
+        progress: progress ?? 0,
+        timeInfo: timeInfo || '',
       } as any);
       res.json(todo);
       return;

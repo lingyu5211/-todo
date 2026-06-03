@@ -13,6 +13,8 @@ interface TodoAttributes {
   timeInfo: string;
   todoSetId?: number;
   userId?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 class Todo extends Model<TodoAttributes> implements TodoAttributes {
@@ -82,7 +84,7 @@ Todo.init(
   {
     sequelize,
     tableName: 'todos',
-    timestamps: false,
+    timestamps: true,
   }
 );
 
