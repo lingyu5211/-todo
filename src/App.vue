@@ -13,6 +13,9 @@
       <TodoSet v-if="activeTab === 'todoSet'" @start-focus="handleStartFocus" />
       <SelfDiscipline v-if="activeTab === 'lock'" :focus-todo="currentFocusTodo" @update:todo="handleUpdateTodo" />
       <StatsDashboard v-if="activeTab === 'stats'" />
+      <StudyRoomList v-if="activeTab === 'studyRoom'" @enter-room="handleEnterStudyRoom" @go-leaderboard="activeTab = 'leaderboard'" />
+      <StudyRoom v-if="activeTab === 'studyRoomDetail' && currentRoomId !== null" :room-id="currentRoomId" @back="handleStudyRoomBack" />
+      <Leaderboard v-if="activeTab === 'leaderboard'" />
       <Profile v-if="activeTab === 'profile'" :user-info="userInfo" @logout="handleLogout" />
     </div>
 
@@ -30,6 +33,9 @@ import StatsDashboard from './components/stats/StatsDashboard.vue'
 import Profile from './components/Profile.vue'
 import TodoSet from './components/TodoSet.vue'
 import Login from './components/Login.vue'
+import StudyRoomList from './views/StudyRoomList.vue'
+import StudyRoom from './views/StudyRoom.vue'
+import Leaderboard from './views/Leaderboard.vue'
 import { login as apiLogin } from './utils/api'
 import type { User, Todo } from './types'
 
@@ -40,6 +46,7 @@ const currentFocusTodo = ref<Todo | null>(null)
 const isLoggedIn = ref<boolean>(false)
 const isLoading = ref<boolean>(true)
 const userInfo = ref<User | null>(null)
+const currentRoomId = ref<number | null>(null)
 const todoListRef = ref<InstanceType<typeof TodoList> | null>(null)
 
 const checkLoginStatus = async () => {
@@ -129,6 +136,15 @@ const handleLogout = async () => {
   isLoggedIn.value = false
   userInfo.value = null
   activeTab.value = 'todo'
+}
+
+const handleEnterStudyRoom = (roomId: number) => {
+  currentRoomId.value = roomId
+  activeTab.value = 'studyRoomDetail'
+}
+
+const handleStudyRoomBack = () => {
+  activeTab.value = 'studyRoom'
 }
 
 onMounted(() => {

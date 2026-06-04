@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { List, FolderOpened, Lock, PieChart, User } from '@element-plus/icons-vue'
+import { List, FolderOpened, Lock, PieChart, User, Reading } from '@element-plus/icons-vue'
 import type { NavItem } from '@/types'
 
 const props = defineProps<{
@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
   { name: 'todoSet', icon: FolderOpened, label: '待办集' },
   { name: 'lock', icon: Lock, label: '锁机' },
   { name: 'stats', icon: PieChart, label: '统计数据' },
+  { name: 'studyRoom', icon: Reading, label: '自习室' },
   { name: 'profile', icon: User, label: '我的' }
 ]
 
