@@ -23,28 +23,28 @@ import type { Room, RoomMember, ChatMessage } from '@/types'
 const props = defineProps<{ roomId: number }>()
 const emit = defineEmits<{ (e: 'back'): void }>()
 
-const { connect, disconnect, emit, on: onSocket } = useSocket()
+const { connect, disconnect, emit: socketEmit, on: onSocket } = useSocket()
 const room = ref<Room | null>(null)
 const members = ref<RoomMember[]>([])
 const chatMessages = ref<ChatMessage[]>([])
 
 const handleLeave = async () => {
-  emit('room:leave', { roomId: props.roomId })
+  socketEmit('room:leave', { roomId: props.roomId })
   try { await leaveRoom(props.roomId) } catch { /* non-critical */ }
   disconnect()
   emit('back')
 }
 
 const onStudyStart = () => {
-  emit('study:start')
+  socketEmit('study:start')
 }
 
 const onStudyStop = () => {
-  emit('study:stop')
+  socketEmit('study:stop')
 }
 
 const sendMessage = (content: string) => {
-  emit('chat:send', { roomId: props.roomId, content })
+  socketEmit('chat:send', { roomId: props.roomId, content })
 }
 
 const loadRoom = async () => {
@@ -64,7 +64,7 @@ const loadRoom = async () => {
 const setupSocket = () => {
   connect()
   setTimeout(() => {
-    emit('room:join', { roomId: props.roomId })
+    socketEmit('room:join', { roomId: props.roomId })
   }, 500)
 
   onSocket('room:members', (data: any[]) => {
@@ -103,7 +103,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  emit('room:leave', { roomId: props.roomId })
+  socketEmit('room:leave', { roomId: props.roomId })
   try { leaveRoom(props.roomId) } catch { /* non-critical */ }
   disconnect()
 })
