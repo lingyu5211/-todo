@@ -33,7 +33,7 @@ import Login from './components/Login.vue'
 import { login as apiLogin } from './utils/api'
 import type { User, Todo } from './types'
 
-const API_BASE_URL = 'http://localhost:5000/api'
+const API_BASE_URL = 'http://localhost:3000/api'
 
 const activeTab = ref<string>('todo')
 const currentFocusTodo = ref<Todo | null>(null)

@@ -1,15 +1,18 @@
-import type { 
-  Todo, 
-  Event, 
-  FocusSession, 
-  TodoSet, 
-  User, 
-  ThemeSettings, 
-  FocusStats, 
-  SubTask 
+import type {
+  Todo,
+  Event,
+  FocusSession,
+  TodoSet,
+  User,
+  ThemeSettings,
+  FocusStats,
+  SubTask,
+  Room,
+  ChatMessage,
+  LeaderboardData,
 } from '@/types';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 interface CreateTodoData {
   text: string;
@@ -467,4 +470,70 @@ export const deleteTodoSet = async (id: number): Promise<{ message: string }> =>
     console.error('Error deleting todo set:', error);
     return { message: '待办集已删除' };
   }
+};
+
+// --- Rooms ---
+
+export const getRooms = async (topic?: string): Promise<Room[]> => {
+  const url = topic ? `${API_BASE_URL}/rooms?topic=${encodeURIComponent(topic)}` : `${API_BASE_URL}/rooms`;
+  const response = await fetch(url, { headers: { ...getAuthHeader() } });
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return response.json();
+};
+
+export const createRoom = async (data: { name: string; description?: string; topic: string; maxMembers?: number }): Promise<Room> => {
+  const response = await fetch(`${API_BASE_URL}/rooms`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || '创建房间失败');
+  }
+  return response.json();
+};
+
+export const getRoomDetail = async (id: number): Promise<Room & { members: any[] }> => {
+  const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+    headers: { ...getAuthHeader() },
+  });
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return response.json();
+};
+
+export const joinRoom = async (id: number): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/rooms/${id}/join`, {
+    method: 'POST',
+    headers: { ...getAuthHeader() },
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error || '加入房间失败');
+  }
+};
+
+export const leaveRoom = async (id: number): Promise<void> => {
+  await fetch(`${API_BASE_URL}/rooms/${id}/leave`, {
+    method: 'POST',
+    headers: { ...getAuthHeader() },
+  });
+};
+
+export const getRoomMessages = async (roomId: number, page: number = 1): Promise<ChatMessage[]> => {
+  const response = await fetch(`${API_BASE_URL}/rooms/${roomId}/messages?page=${page}`, {
+    headers: { ...getAuthHeader() },
+  });
+  if (!response.ok) return [];
+  return response.json();
+};
+
+// --- Leaderboard ---
+
+export const getLeaderboard = async (period: 'day' | 'week' | 'month' = 'week'): Promise<LeaderboardData> => {
+  const response = await fetch(`${API_BASE_URL}/leaderboard?period=${period}`, {
+    headers: { ...getAuthHeader() },
+  });
+  if (!response.ok) return { period: 'week', startDate: '', leaderboard: [] };
+  return response.json();
 };

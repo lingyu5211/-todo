@@ -97,10 +97,57 @@ export interface DeepSeekAnalysisResponse {
 
 export type PriorityLevel = 'high' | 'medium' | 'low';
 
-export type TabName = 'todo' | 'todoSet' | 'lock' | 'stats' | 'profile';
+export type TabName = 'todo' | 'todoSet' | 'lock' | 'stats' | 'studyRoom' | 'studyRoomDetail' | 'leaderboard' | 'profile';
 
 export interface NavItem {
   name: TabName;
   icon: any;
   label: string;
+}
+
+export interface Room {
+  id: number;
+  name: string;
+  description: string;
+  topic: string;
+  maxMembers: number;
+  creatorId: number;
+  isPublic: boolean;
+  onlineCount: number;
+  createdAt: string;
+}
+
+export interface RoomMember {
+  userId: number;
+  username: string;
+  name: string;
+  avatar: string;
+  isOnline: boolean;
+  studyStatus: 'idle' | 'studying' | 'resting';
+}
+
+export interface ChatMessage {
+  id: number;
+  userId: number;
+  username: string;
+  name: string;
+  avatar: string;
+  content: string;
+  type: 'text' | 'system';
+  createdAt: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  username: string;
+  name: string;
+  avatar: string;
+  totalMinutes: number;
+}
+
+export interface LeaderboardData {
+  period: 'day' | 'week' | 'month';
+  startDate: string;
+  leaderboard: LeaderboardEntry[];
 }
