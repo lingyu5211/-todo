@@ -1,12 +1,19 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from 'http';
 import sequelize from './config/db';
 import Todo from './models/Todo';
 import Event from './models/Event';
 import FocusSession from './models/FocusSession';
 import TodoSet from './models/TodoSet';
 import User from './models/User';
+import Room from './models/Room';
+import RoomMember from './models/RoomMember';
+import Message from './models/Message';
+import roomsRouter from './routes/rooms';
+import leaderboardRouter from './routes/leaderboard';
+import { setupSocketIO } from './socket';
 import https from 'https';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -14,11 +21,14 @@ import jwt from 'jsonwebtoken';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/rooms', roomsRouter);
+app.use('/api/leaderboard', leaderboardRouter);
 
 let useDatabase = false;
 
@@ -772,7 +782,9 @@ app.post('/api/deepseek/analyze-todo-set', authenticateToken, async (req: Reques
 });
 
 initDatabase().then(() => {
-  app.listen(PORT, () => {
+  const server = http.createServer(app);
+  setupSocketIO(server);
+  server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 });
