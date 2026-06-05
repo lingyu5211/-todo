@@ -9,6 +9,7 @@ interface RoomAttributes {
   maxMembers: number;
   creatorId: number;
   isPublic: boolean;
+  password: string | null;
 }
 
 interface RoomCreationAttributes extends Optional<RoomAttributes, 'id'> {}
@@ -21,6 +22,7 @@ class Room extends Model<RoomAttributes, RoomCreationAttributes> implements Room
   public maxMembers!: number;
   public creatorId!: number;
   public isPublic!: boolean;
+  public password!: string | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -59,6 +61,11 @@ Room.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {

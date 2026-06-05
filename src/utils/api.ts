@@ -481,7 +481,7 @@ export const getRooms = async (topic?: string): Promise<Room[]> => {
   return response.json();
 };
 
-export const createRoom = async (data: { name: string; description?: string; topic: string; maxMembers?: number }): Promise<Room> => {
+export const createRoom = async (data: { name: string; description?: string; topic: string; maxMembers?: number; password?: string }): Promise<Room> => {
   const response = await fetch(`${API_BASE_URL}/rooms`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
@@ -502,10 +502,11 @@ export const getRoomDetail = async (id: number): Promise<Room & { members: any[]
   return response.json();
 };
 
-export const joinRoom = async (id: number): Promise<void> => {
+export const joinRoom = async (id: number, password?: string): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/rooms/${id}/join`, {
     method: 'POST',
-    headers: { ...getAuthHeader() },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    body: JSON.stringify(password ? { password } : {}),
   });
   if (!response.ok) {
     const err = await response.json();

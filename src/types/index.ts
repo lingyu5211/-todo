@@ -114,6 +114,7 @@ export interface Room {
   creatorId: number;
   isPublic: boolean;
   onlineCount: number;
+  hasPassword: boolean;
   createdAt: string;
 }
 

@@ -4,6 +4,7 @@ import RoomMember from '../models/RoomMember';
 import Message from '../models/Message';
 import User from '../models/User';
 import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
     const rooms = await Room.findAll({ where, order: [['createdAt', 'DESC']] });
     const result = await Promise.all(rooms.map(async (room) => {
       const onlineCount = await RoomMember.count({ where: { roomId: room.id, isOnline: true } });
-      return { ...room.toJSON(), onlineCount };
+      return { ...room.toJSON(), onlineCount, hasPassword: !!room.password };
     }));
     res.json(result);
   } catch (error: any) {
@@ -28,11 +29,20 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 router.post('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const user = (req as AuthenticatedRequest).user!;
-    const { name, description, topic, maxMembers = 100, isPublic = true } = req.body;
+    const { name, description, topic, maxMembers = 100, isPublic = true, password } = req.body;
     if (!name || !topic) {
       return res.status(400).json({ error: '房间名称和主题不能为空' });
     }
-    const room = await Room.create({ name, description: description || '', topic, maxMembers, creatorId: user.id, isPublic } as any);
+    if (password !== undefined && password !== null && password !== '') {
+      if (typeof password !== 'string' || password.length < 4 || password.length > 16) {
+        return res.status(400).json({ error: '密码长度需要4-16个字符' });
+      }
+    }
+    const hashedPassword = (password && password !== '') ? bcrypt.hashSync(password, 10) : null;
+    const room = await Room.create({
+      name, description: description || '', topic, maxMembers,
+      creatorId: user.id, isPublic, password: hashedPassword,
+    } as any);
     await RoomMember.create({ roomId: room.id, userId: user.id, isOnline: false, studyStatus: 'idle' } as any);
     res.status(201).json(room);
   } catch (error: any) {
@@ -63,8 +73,18 @@ router.post('/:id/join', authenticateToken, async (req: Request, res: Response) 
   try {
     const user = (req as AuthenticatedRequest).user!;
     const roomId = parseInt(req.params.id as string, 10);
+    const { password } = req.body;
     const room = await Room.findByPk(roomId);
     if (!room) return res.status(404).json({ error: '房间不存在' });
+    const isCreator = user.id === room.creatorId;
+    if (room.password && !isCreator) {
+      if (!password) {
+        return res.status(403).json({ error: 'Password required' });
+      }
+      if (!bcrypt.compareSync(password, room.password)) {
+        return res.status(403).json({ error: 'Incorrect password' });
+      }
+    }
     const count = await RoomMember.count({ where: { roomId } });
     if (count >= room.maxMembers) return res.status(400).json({ error: '房间已满' });
     let member = await RoomMember.findOne({ where: { roomId, userId: user.id } });

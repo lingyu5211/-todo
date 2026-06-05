@@ -31,9 +31,13 @@
         v-for="room in filteredRooms"
         :key="room.id"
         class="room-card"
-        @click="enterRoom(room.id)"
+        @click="enterRoom(room)"
       >
-        <div class="room-name">{{ room.name }}</div>
+        <div class="room-name">
+          {{ room.name }}
+          <span v-if="room.hasPassword" class="lock-icon">🔒</span>
+          <span v-else class="lock-icon unlock">🔓</span>
+        </div>
         <div class="room-topic">
           <el-tag size="small">{{ room.topic }}</el-tag>
         </div>
@@ -41,6 +45,7 @@
         <div class="room-footer">
           <span class="room-count">{{ room.onlineCount }}人在线</span>
           <span class="room-max">/ {{ room.maxMembers }}</span>
+          <span v-if="room.hasPassword" class="room-locked">🔒 加密</span>
         </div>
       </div>
     </div>
@@ -58,20 +63,39 @@
         <el-form-item label="简介（可选）">
           <el-input v-model="form.description" type="textarea" maxlength="100" placeholder="简单介绍一下" />
         </el-form-item>
+        <el-form-item label="房间密码（可选）">
+          <el-input
+            v-model="form.password"
+            type="password"
+            show-password
+            maxlength="16"
+            minlength="4"
+            placeholder="4-16位，留空则无密码"
+          />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showCreateDialog = false">取消</el-button>
         <el-button type="primary" @click="createRoom" :disabled="!form.name || !form.topic">创建</el-button>
       </template>
     </el-dialog>
+
+    <JoinPasswordDialog
+      :visible="showPasswordDialog"
+      :room-name="pendingRoom?.name || ''"
+      :room-id="pendingRoom?.id || 0"
+      @close="onPasswordDialogClose"
+      @joined="(roomId: number) => { showPasswordDialog = false; pendingRoom = null; emit('enterRoom', roomId) }"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getRooms, createRoom as apiCreateRoom } from '@/utils/api'
+import { getRooms, createRoom as apiCreateRoom, joinRoom as apiJoinRoom } from '@/utils/api'
 import type { Room } from '@/types'
+import JoinPasswordDialog from '@/components/JoinPasswordDialog.vue'
 
 const emit = defineEmits<{
   (e: 'enterRoom', roomId: number): void
@@ -83,7 +107,10 @@ const rooms = ref<Room[]>([])
 const loading = ref(false)
 const selectedTopic = ref('')
 const showCreateDialog = ref(false)
-const form = ref({ name: '', topic: '', description: '' })
+const form = ref({ name: '', topic: '', description: '', password: '' })
+
+const showPasswordDialog = ref(false)
+const pendingRoom = ref<Room | null>(null)
 
 const filteredRooms = computed(() => {
   if (!selectedTopic.value) return rooms.value
@@ -103,9 +130,11 @@ const loadRooms = async () => {
 
 const createRoom = async () => {
   try {
-    const room = await apiCreateRoom({ name: form.value.name, topic: form.value.topic, description: form.value.description })
+    const data: any = { name: form.value.name, topic: form.value.topic, description: form.value.description }
+    if (form.value.password) data.password = form.value.password
+    const room = await apiCreateRoom(data)
     showCreateDialog.value = false
-    form.value = { name: '', topic: '', description: '' }
+    form.value = { name: '', topic: '', description: '', password: '' }
     ElMessage.success('房间创建成功')
     emit('enterRoom', room.id)
   } catch (e: any) {
@@ -113,8 +142,23 @@ const createRoom = async () => {
   }
 }
 
-const enterRoom = (roomId: number) => {
-  emit('enterRoom', roomId)
+const enterRoom = async (room: Room) => {
+  try {
+    await apiJoinRoom(room.id)
+    emit('enterRoom', room.id)
+  } catch (e: any) {
+    if (e.message === 'Password required') {
+      pendingRoom.value = room
+      showPasswordDialog.value = true
+    } else {
+      ElMessage.error(e.message || '加入房间失败')
+    }
+  }
+}
+
+const onPasswordDialogClose = () => {
+  showPasswordDialog.value = false
+  pendingRoom.value = null
 }
 
 onMounted(() => {
@@ -185,6 +229,17 @@ onMounted(() => {
 }
 .room-count {
   color: #67C23A;
+}
+.lock-icon {
+  font-size: 16px;
+}
+.lock-icon.unlock {
+  opacity: 0.3;
+}
+.room-locked {
+  color: #f56c6c;
+  font-size: 11px;
+  margin-left: 6px;
 }
 .loading-text, .empty-text {
   text-align: center;
