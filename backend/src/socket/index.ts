@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import RoomMember from '../models/RoomMember';
 import Message from '../models/Message';
 import User from '../models/User';
-import { addUser, removeUser, getRoomUsers } from './roomManager';
+import { addUser, removeUserByUserId, getRoomUsers } from './roomManager';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
@@ -33,12 +33,15 @@ export const setupSocketIO = (httpServer: HttpServer) => {
       const displayName = dbUser?.name || user.username;
       const avatar = dbUser?.avatar || '';
 
+      // Clean old socket entries for this userId first (prevents duplicates on reconnect)
+      removeUserByUserId(roomId, user.id);
       addUser(roomId, socket.id, { userId: user.id, username: user.username, name: displayName, avatar });
       socket.join(`room:${roomId}`);
 
       await RoomMember.update({ isOnline: true }, { where: { roomId, userId: user.id } });
       const member = await RoomMember.findOne({ where: { roomId, userId: user.id } });
 
+      // Broadcast to other members
       socket.to(`room:${roomId}`).emit('room:member_joined', {
         userId: user.id,
         username: user.username,
@@ -47,19 +50,30 @@ export const setupSocketIO = (httpServer: HttpServer) => {
         studyStatus: member?.studyStatus || 'idle',
       });
 
-      socket.emit('room:members', getRoomUsers(roomId).map(u => ({
-        userId: u.userId,
-        username: u.username,
-        name: u.name,
-        avatar: u.avatar,
-        isOnline: true,
-        studyStatus: 'idle',
-      })));
+      // Send deduplicated member list with actual DB studyStatus
+      const roomUsers = getRoomUsers(roomId);
+      const seen = new Set<number>();
+      const memberList = [];
+      for (const u of roomUsers) {
+        if (!seen.has(u.userId)) {
+          seen.add(u.userId);
+          const m = await RoomMember.findOne({ where: { roomId, userId: u.userId } });
+          memberList.push({
+            userId: u.userId,
+            username: u.username,
+            name: u.name,
+            avatar: u.avatar,
+            isOnline: true,
+            studyStatus: m?.studyStatus || 'idle',
+          });
+        }
+      }
+      socket.emit('room:members', memberList);
     });
 
     socket.on('room:leave', async ({ roomId }: { roomId: number }) => {
       socket.leave(`room:${roomId}`);
-      removeUser(roomId, socket.id);
+      removeUserByUserId(roomId, user.id);
       await RoomMember.update({ isOnline: false, studyStatus: 'idle' }, { where: { roomId, userId: user.id } });
       io.to(`room:${roomId}`).emit('room:member_left', { userId: user.id });
     });
@@ -102,13 +116,17 @@ export const setupSocketIO = (httpServer: HttpServer) => {
     });
 
     socket.on('disconnect', async () => {
-      console.log(`User ${user.username} disconnected`);
+      console.log(`User ${user.username} disconnected via socket ${socket.id}`);
       for (const roomName of socket.rooms) {
         if (roomName.startsWith('room:')) {
           const roomId = parseInt(roomName.split(':')[1], 10);
-          removeUser(roomId, socket.id);
-          await RoomMember.update({ isOnline: false, studyStatus: 'idle' }, { where: { roomId, userId: user.id } });
-          io.to(roomName).emit('room:member_left', { userId: user.id });
+          removeUserByUserId(roomId, user.id);
+          // Only mark offline if user has no other active sockets in this room
+          const remaining = getRoomUsers(roomId).filter(u => u.userId === user.id);
+          if (remaining.length === 0) {
+            await RoomMember.update({ isOnline: false, studyStatus: 'idle' }, { where: { roomId, userId: user.id } });
+            io.to(roomName).emit('room:member_left', { userId: user.id });
+          }
         }
       }
     });

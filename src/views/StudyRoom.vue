@@ -68,7 +68,15 @@ const setupSocket = () => {
   }, 500)
 
   onSocket('room:members', (data: any[]) => {
-    members.value = data
+    // Merge with existing members, deduplicate by userId
+    const merged = new Map<number, RoomMember>()
+    // Keep existing offline members so they don't vanish
+    for (const m of members.value) merged.set(m.userId, m)
+    // Overlay with fresh server data
+    for (const m of data) {
+      merged.set(m.userId, { ...merged.get(m.userId), ...m, isOnline: true })
+    }
+    members.value = Array.from(merged.values())
   })
 
   onSocket('room:member_joined', (data: any) => {

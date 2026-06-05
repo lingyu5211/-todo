@@ -13,6 +13,16 @@ export const removeUser = (roomId: number, socketId: string) => {
   }
 };
 
+// Remove all socket entries for a given userId in a room (prevents duplicates on reconnect)
+export const removeUserByUserId = (roomId: number, userId: number) => {
+  const room = rooms.get(roomId);
+  if (!room) return;
+  for (const [socketId, user] of room) {
+    if (user.userId === userId) room.delete(socketId);
+  }
+  if (room.size === 0) rooms.delete(roomId);
+};
+
 export const getRoomUsers = (roomId: number) => {
   const room = rooms.get(roomId);
   if (!room) return [];
