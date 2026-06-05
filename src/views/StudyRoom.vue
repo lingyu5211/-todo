@@ -68,15 +68,26 @@ const setupSocket = () => {
   }, 500)
 
   onSocket('room:members', (data: any[]) => {
-    // Merge with existing members, deduplicate by userId
-    const merged = new Map<number, RoomMember>()
-    // Keep existing offline members so they don't vanish
-    for (const m of members.value) merged.set(m.userId, m)
-    // Overlay with fresh server data
-    for (const m of data) {
-      merged.set(m.userId, { ...merged.get(m.userId), ...m, isOnline: true })
+    // Server list = currently connected users. Only these should be online.
+    const serverUserIds = new Set(data.map((m: any) => m.userId))
+    // Mark everyone not in server list as offline
+    for (const m of members.value) {
+      m.isOnline = serverUserIds.has(m.userId)
     }
-    members.value = Array.from(merged.values())
+    // Upsert members from server list
+    for (const m of data) {
+      const exists = members.value.find(x => x.userId === m.userId)
+      if (!exists) {
+        members.value.push({ ...m, isOnline: true })
+      } else {
+        exists.isOnline = true
+        exists.studyStatus = m.studyStatus || exists.studyStatus
+        exists.name = m.name || exists.name
+        exists.avatar = m.avatar || exists.avatar
+      }
+    }
+    // Keep header count in sync with WS reality
+    if (room.value) room.value.onlineCount = data.length
   })
 
   onSocket('room:member_joined', (data: any) => {
@@ -87,11 +98,14 @@ const setupSocket = () => {
       exists.isOnline = true
       exists.studyStatus = data.studyStatus
     }
+    // Sync header count
+    if (room.value) room.value.onlineCount = members.value.filter(m => m.isOnline).length
   })
 
   onSocket('room:member_left', ({ userId }: { userId: number }) => {
     const m = members.value.find(x => x.userId === userId)
     if (m) m.isOnline = false
+    if (room.value) room.value.onlineCount = members.value.filter(m => m.isOnline).length
   })
 
   onSocket('room:member_status', ({ userId, studyStatus }: { userId: number; studyStatus: string }) => {
