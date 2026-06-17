@@ -27,12 +27,14 @@ defineEmits<{ (e: 'leave'): void }>()
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: white;
-  border-bottom: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
 }
 .header-name {
   font-size: 16px;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
 }
 .header-meta {
   display: flex;

@@ -87,12 +87,12 @@ const handleSubmit = async () => {
 .password-label {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0 0 4px 0;
 }
 .password-hint {
   font-size: 13px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.5);
   margin: 0 0 20px 0;
 }
 .password-error {

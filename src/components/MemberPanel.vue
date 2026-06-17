@@ -33,14 +33,15 @@ const statusClass = (s: string) => ({ studying: 'status-studying', resting: 'sta
 
 <style scoped>
 .member-panel {
-  background: white;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 12px;
 }
 .panel-title {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 8px;
 }
 .member-list {
@@ -52,15 +53,15 @@ const statusClass = (s: string) => ({ studying: 'status-studying', resting: 'sta
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #f5f7fa;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 4px 10px 4px 6px;
   font-size: 12px;
 }
 .member-avatar { font-size: 16px; }
-.member-name { color: #303133; }
+.member-name { color: rgba(255, 255, 255, 0.8); }
 .member-status { font-weight: 500; }
 .status-studying { color: #67C23A; }
 .status-resting { color: #E6A23C; }
-.status-idle { color: #909399; }
+.status-idle { color: rgba(255, 255, 255, 0.4); }
 </style>

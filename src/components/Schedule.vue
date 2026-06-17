@@ -280,20 +280,19 @@ export default {
 <style scoped>
 .schedule-container {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
 }
 
 .schedule-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .header-card {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   padding: 15px 20px;
 }
@@ -355,8 +354,7 @@ export default {
 
 .calendar-card {
   margin: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   overflow: hidden;
 }
 
@@ -389,36 +387,37 @@ export default {
   justify-content: center;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
   position: relative;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .day:hover {
-  background-color: #ecf5ff;
-  border-color: #d9ecff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .other-month {
-  color: #c0c4cc;
-  background-color: #f0f0f0;
+  color: rgba(255, 255, 255, 0.2);
+  background: transparent;
 }
 
 .has-event {
-  background-color: #f0f9eb;
-  border-color: #e6f7e0;
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 .selected {
-  background-color: #e6f7ff;
-  border: 2px solid #91d5ff;
+  background: rgba(99, 102, 241, 0.25);
+  border: 2px solid var(--theme-primary);
 }
 
 .today {
-  background-color: #e3f2fd;
+  background: rgba(99, 102, 241, 0.15);
   font-weight: bold;
-  border: 2px solid #409EFF;
+  border: 2px solid var(--theme-primary);
 }
 
 .day-badge {
@@ -435,30 +434,27 @@ export default {
 }
 
 .events-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   overflow: hidden;
+  margin: 0 20px 20px;
 }
 
 .events-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 20px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
 }
 
 .header-icon {
   font-size: 20px;
-  color: #409EFF;
+  color: var(--theme-primary);
 }
 
 .events-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: bold;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .add-event {
@@ -525,7 +521,7 @@ export default {
 
 .event-title {
   font-size: 14px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* PC端样式 */

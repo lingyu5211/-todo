@@ -33,6 +33,10 @@ export const setupSocketIO = (httpServer: HttpServer) => {
       const displayName = dbUser?.name || user.username;
       const avatar = dbUser?.avatar || '';
 
+      // Check if this is a reconnection (user already has a member record)
+      const existingMember = await RoomMember.findOne({ where: { roomId, userId: user.id } });
+      const isReconnect = existingMember && !existingMember.isOnline;
+
       // Clean old socket entries for this userId first (prevents duplicates on reconnect)
       removeUserByUserId(roomId, user.id);
       addUser(roomId, socket.id, { userId: user.id, username: user.username, name: displayName, avatar });
@@ -41,14 +45,22 @@ export const setupSocketIO = (httpServer: HttpServer) => {
       await RoomMember.update({ isOnline: true }, { where: { roomId, userId: user.id } });
       const member = await RoomMember.findOne({ where: { roomId, userId: user.id } });
 
-      // Broadcast to other members
-      socket.to(`room:${roomId}`).emit('room:member_joined', {
-        userId: user.id,
-        username: user.username,
-        name: displayName,
-        avatar,
-        studyStatus: member?.studyStatus || 'idle',
-      });
+      // Only broadcast "joined" if genuinely new, not reconnecting
+      if (!isReconnect) {
+        socket.to(`room:${roomId}`).emit('room:member_joined', {
+          userId: user.id,
+          username: user.username,
+          name: displayName,
+          avatar,
+          studyStatus: member?.studyStatus || 'idle',
+        });
+      } else {
+        // Reconnect — just update status silently
+        socket.to(`room:${roomId}`).emit('room:member_status', {
+          userId: user.id,
+          studyStatus: member?.studyStatus || 'idle',
+        });
+      }
 
       // Send deduplicated member list with actual DB studyStatus
       const roomUsers = getRoomUsers(roomId);

@@ -79,7 +79,7 @@ onMounted(() => { loadData() })
 }
 .page-header h2 {
   font-size: 20px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 16px;
 }
 .period-tabs {
@@ -96,39 +96,40 @@ onMounted(() => { loadData() })
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 12px 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 .rank-item.top-three {
-  background: linear-gradient(135deg, #fff9e6, #fff);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 .rank-number {
   font-size: 20px;
   width: 32px;
   text-align: center;
   font-weight: 700;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.4);
 }
-.rank-gold { color: #E6A23C; }
-.rank-silver { color: #909399; }
-.rank-bronze { color: #CD853F; }
+.rank-gold { color: #f59e0b; }
+.rank-silver { color: #94a3b8; }
+.rank-bronze { color: #d97706; }
 .rank-avatar { font-size: 24px; }
 .rank-name {
   flex: 1;
   font-size: 14px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
 }
 .rank-minutes {
   font-size: 13px;
-  color: #409EFF;
+  color: var(--theme-primary);
   font-weight: 600;
 }
 .loading-text, .empty-text {
   text-align: center;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.4);
   margin-top: 40px;
 }
 </style>

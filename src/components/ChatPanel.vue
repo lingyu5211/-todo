@@ -57,7 +57,8 @@ watch(() => props.messages.length, async () => {
 .chat-panel {
   display: flex;
   flex-direction: column;
-  background: white;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -75,23 +76,23 @@ watch(() => props.messages.length, async () => {
   text-align: center;
 }
 .system-text {
-  color: #909399;
+  color: rgba(255, 255, 255, 0.35);
   font-size: 12px;
 }
 .msg-sender {
-  color: #409EFF;
+  color: var(--theme-primary);
   font-weight: 500;
 }
 .msg-content {
-  color: #303133;
+  color: rgba(255, 255, 255, 0.8);
 }
 .empty-chat {
   text-align: center;
-  color: #C0C4CC;
+  color: rgba(255, 255, 255, 0.3);
   margin-top: 40px;
 }
 .input-bar {
   padding: 8px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 </style>

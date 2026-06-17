@@ -306,7 +306,6 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 0;
-  background-color: #f5f5f5;
   min-height: 100vh;
 }
 
@@ -315,9 +314,9 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -356,16 +355,17 @@ export default {
 }
 
 .todo-info {
-  background-color: white;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 10px 20px;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px 20px;
+  border-radius: 12px;
 }
 
 .todo-info p {
   margin: 0;
   font-size: 14px;
-  color: #1890ff;
+  color: var(--theme-primary);
   font-weight: 500;
 }
 

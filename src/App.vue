@@ -37,7 +37,10 @@ import StudyRoomList from './views/StudyRoomList.vue'
 import StudyRoom from './views/StudyRoom.vue'
 import Leaderboard from './views/Leaderboard.vue'
 import { login as apiLogin } from './utils/api'
+import { useTheme } from './composables/useTheme'
 import type { User, Todo } from './types'
+
+const { initTheme } = useTheme()
 
 const API_BASE_URL = 'http://localhost:3000/api'
 
@@ -148,6 +151,7 @@ const handleStudyRoomBack = () => {
 }
 
 onMounted(() => {
+  initTheme()
   checkLoginStatus()
 })
 </script>
@@ -161,8 +165,6 @@ onMounted(() => {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -179,14 +181,14 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1a1a2e 100%);
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
 }
 
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.15);
-  border-top-color: #60a5fa;
+  border: 5px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--theme-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

@@ -1,0 +1,187 @@
+<mxfile host="app.diagrams.net" agent="5.0.1">
+  <diagram id="diagram1" name="待办日程管理系统 - 网络架构图">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="internet" parent="1" value="Internet" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFE4C4;strokeColor=#D2691E;" vertex="1">
+          <mxGeometry x="250" y="280" width="500" height="400" as="geometry"/>
+        </mxCell>
+        <mxCell id="pstn" parent="1" value="PSTN" style="shape=cloud;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#E0E0E0;strokeColor=#BDBDBD;" vertex="1">
+          <mxGeometry x="850" y="60" width="180" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="database" parent="1" value="Database" style="shape=database;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#4CAF50;strokeColor=#2E7D32;" vertex="1">
+          <mxGeometry x="500" y="30" width="80" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="web_server" parent="1" value="Web Server" style="shape=server;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#90CAF9;strokeColor=#1976D2;" vertex="1">
+          <mxGeometry x="400" y="110" width="70" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="radius_server" parent="1" value="AAA &amp; CDR&lt;br&gt;Radius Server" style="shape=server;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#90CAF9;strokeColor=#1976D2;" vertex="1">
+          <mxGeometry x="480" y="110" width="70" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="aaa_server" parent="1" value="Web Server" style="shape=server;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#90CAF9;strokeColor=#1976D2;" vertex="1">
+          <mxGeometry x="560" y="110" width="70" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="nms_server" parent="1" value="NMS&lt;br&gt;Network Management" style="shape=server;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#E1BEE7;strokeColor=#7B1FA2;" vertex="1">
+          <mxGeometry x="80" y="260" width="80" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="router1" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="180" y="380" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router2" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="420" y="200" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router3" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="540" y="200" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router4" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="700" y="280" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router5" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="700" y="380" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router6" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="40" y="480" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router7" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="300" y="580" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router8" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="600" y="580" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="router9" parent="1" value="Router" style="shape=router;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFCA28;strokeColor=#FF8F00;" vertex="1">
+          <mxGeometry x="840" y="420" width="60" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="sip_server1" parent="1" value="SIP Server" style="shape=switch;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#18FFFF;strokeColor=#00ACC1;" vertex="1">
+          <mxGeometry x="100" y="450" width="70" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sip_server2" parent="1" value="SIP Server" style="shape=switch;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#18FFFF;strokeColor=#00ACC1;" vertex="1">
+          <mxGeometry x="720" y="350" width="70" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sip_server3" parent="1" value="SIP Server" style="shape=switch;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#18FFFF;strokeColor=#00ACC1;" vertex="1">
+          <mxGeometry x="320" y="620" width="70" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sip_server4" parent="1" value="SIP Server" style="shape=switch;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#18FFFF;strokeColor=#00ACC1;" vertex="1">
+          <mxGeometry x="620" y="620" width="70" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_phone1" parent="1" value="IP Phone" style="shape=phone;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFAB91;strokeColor=#E64A19;" vertex="1">
+          <mxGeometry x="10" y="420" width="40" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_phone2" parent="1" value="IP Phone" style="shape=phone;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFAB91;strokeColor=#E64A19;" vertex="1">
+          <mxGeometry x="340" y="540" width="40" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_phone3" parent="1" value="IP Phone" style="shape=phone;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFAB91;strokeColor=#E64A19;" vertex="1">
+          <mxGeometry x="640" y="540" width="40" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ip_phone4" parent="1" value="IP Phone" style="shape=phone;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFAB91;strokeColor=#E64A19;" vertex="1">
+          <mxGeometry x="880" y="400" width="40" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="sip_gateway" parent="1" value="SIP Gateway" style="shape=endpoint;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FF5252;strokeColor=#C62828;" vertex="1">
+          <mxGeometry x="780" y="200" width="50" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="proxy" parent="1" value="Proxy" style="shape=proxy;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#CE93D8;strokeColor=#8E24AA;" vertex="1">
+          <mxGeometry x="950" y="680" width="70" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="media_proxy" parent="1" value="Media Proxy" style="shape=proxy;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#CE93D8;strokeColor=#8E24AA;" vertex="1">
+          <mxGeometry x="1030" y="730" width="70" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="pc1" parent="1" value="PC" style="shape=computer;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFF59D;strokeColor=#F9A825;" vertex="1">
+          <mxGeometry x="80" y="680" width="50" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="pc2" parent="1" value="PC" style="shape=computer;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFF59D;strokeColor=#F9A825;" vertex="1">
+          <mxGeometry x="140" y="680" width="50" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="pc3" parent="1" value="PC" style="shape=computer;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFF59D;strokeColor=#F9A825;" vertex="1">
+          <mxGeometry x="200" y="680" width="50" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="pc4" parent="1" value="PC" style="shape=computer;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFF59D;strokeColor=#F9A825;" vertex="1">
+          <mxGeometry x="720" y="680" width="50" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="pc5" parent="1" value="PC" style="shape=computer;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFF59D;strokeColor=#F9A825;" vertex="1">
+          <mxGeometry x="780" y="680" width="50" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="pc6" parent="1" value="PC" style="shape=computer;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#FFF59D;strokeColor=#F9A825;" vertex="1">
+          <mxGeometry x="840" y="680" width="50" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge1" edge="1" parent="1" source="database" target="router2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge2" edge="1" parent="1" source="web_server" target="router3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge3" edge="1" parent="1" source="aaa_server" target="router2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge4" edge="1" parent="1" source="nms_server" target="router1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge5" edge="1" parent="1" source="ip_phone1" target="router6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge6" edge="1" parent="1" source="router6" target="sip_server1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge7" edge="1" parent="1" source="sip_server1" target="router1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge8" edge="1" parent="1" source="sip_server2" target="router4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge9" edge="1" parent="1" source="sip_server2" target="router5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge10" edge="1" parent="1" source="router4" target="sip_gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge11" edge="1" parent="1" source="sip_gateway" target="pstn" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge12" edge="1" parent="1" source="sip_server3" target="router7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge13" edge="1" parent="1" source="sip_server4" target="router8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge14" edge="1" parent="1" source="router9" target="ip_phone4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge15" edge="1" parent="1" source="sip_server3" target="pc1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge16" edge="1" parent="1" source="sip_server3" target="pc2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge17" edge="1" parent="1" source="sip_server3" target="pc3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge18" edge="1" parent="1" source="sip_server4" target="pc4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge19" edge="1" parent="1" source="sip_server4" target="pc5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge20" edge="1" parent="1" source="sip_server4" target="pc6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="label_rtp1" parent="1" value="RTP" style="text;html=1;strokeColor=#1976D2;fillColor=none;fontSize=11;fontStyle=1;" vertex="1">
+          <mxGeometry x="560" y="170" width="40" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="label_cdr1" parent="1" value="CDR" style="text;html=1;strokeColor=#7B1FA2;fillColor=none;fontSize=11;fontStyle=1;" vertex="1">
+          <mxGeometry x="420" y="320" width="40" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="label_rtp2" parent="1" value="RTP" style="text;html=1;strokeColor=#1976D2;fillColor=none;fontSize=11;fontStyle=1;" vertex="1">
+          <mxGeometry x="80" y="370" width="40" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="label_rtp3" parent="1" value="RTP" style="text;html=1;strokeColor=#1976D2;fillColor=none;fontSize=11;fontStyle=1;" vertex="1">
+          <mxGeometry x="800" y="350" width="40" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="label_rtp4" parent="1" value="RTP" style="text;html=1;strokeColor=#1976D2;fillColor=none;fontSize=11;fontStyle=1;" vertex="1">
+          <mxGeometry x="220" y="550" width="40" height="15" as="geometry"/>
+        </mxCell>
+        <mxCell id="label_rtp5" parent="1" value="RTP" style="text;html=1;strokeColor=#1976D2;fillColor=none;fontSize=11;fontStyle=1;" vertex="1">
+          <mxGeometry x="520" y="550" width="40" height="15" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

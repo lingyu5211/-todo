@@ -572,7 +572,6 @@ export default {
   margin: 0 auto;
   padding: 0;
   min-height: 100vh;
-  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
 }
 
 .todo-set-header {
@@ -580,9 +579,9 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -622,8 +621,8 @@ export default {
 
 .todo-set-info {
   padding: 15px 20px;
-  background-color: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .study-mode-btn {
@@ -644,9 +643,9 @@ export default {
 }
 
 .todo-set-item {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   overflow: hidden;
 }
 
@@ -655,14 +654,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .todo-set-title {
   font-size: 16px;
   font-weight: bold;
   margin: 0;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .todo-set-actions {
@@ -673,7 +672,7 @@ export default {
 .todo-set-actions .el-button {
   background-color: transparent;
   border: none;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 14px;
   width: 32px;
   height: 32px;
@@ -683,7 +682,7 @@ export default {
 }
 
 .todo-set-actions .el-button:hover {
-  background-color: #f5f7fa;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .todo-set-tasks {
@@ -695,8 +694,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s;
 }
 
 .task-item:last-child {
@@ -704,19 +703,19 @@ export default {
 }
 
 .task-item:hover {
-  background-color: #f5f7fa;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .task-item-green {
-  background-color: #f0f9eb;
+  background: rgba(103, 194, 58, 0.08);
 }
 
 .task-item-pink {
-  background-color: #fef0f0;
+  background: rgba(245, 108, 108, 0.08);
 }
 
 .task-item-orange {
-  background-color: #fdf6ec;
+  background: rgba(230, 162, 60, 0.08);
 }
 
 .task-info {
@@ -727,12 +726,12 @@ export default {
   font-size: 16px;
   font-weight: bold;
   margin: 0 0 5px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .task-meta {
   font-size: 12px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.4);
   margin: 0;
 }
 
@@ -799,30 +798,32 @@ export default {
 /* 待办集菜单样式 */
 .todo-set-menu {
   position: fixed;
-  background-color: white;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: rgba(30, 27, 75, 0.98);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 1000;
   min-width: 150px;
 }
 
 .menu-item {
-  padding: 8px 16px;
+  padding: 10px 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s;
 }
 
 .menu-item:hover {
-  background-color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .menu-item.delete {
-  color: #ff4d4f;
+  color: #f87171;
 }
 
 .menu-item.delete:hover {
-  background-color: #fff2f0;
+  background: rgba(248, 113, 113, 0.1);
 }
 
 /* 编辑表单样式 */

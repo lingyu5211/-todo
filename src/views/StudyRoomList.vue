@@ -178,7 +178,7 @@ onMounted(() => {
 }
 .page-header h2 {
   font-size: 20px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
 }
 .header-actions {
   display: flex;
@@ -199,12 +199,12 @@ onMounted(() => {
   gap: 12px;
 }
 .room-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: all 0.15s;
 }
 .room-card:active {
   transform: scale(0.98);
@@ -212,7 +212,7 @@ onMounted(() => {
 .room-name {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
 }
 .room-topic {
   margin-top: 6px;
@@ -220,12 +220,12 @@ onMounted(() => {
 .room-desc {
   margin-top: 6px;
   font-size: 13px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.4);
 }
 .room-footer {
   margin-top: 10px;
   font-size: 13px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.5);
 }
 .room-count {
   color: #67C23A;

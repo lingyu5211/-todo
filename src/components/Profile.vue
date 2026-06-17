@@ -131,7 +131,7 @@
             </div>
           </div>
           <div class="setting-right">
-            <div class="color-preview" :style="{ backgroundColor: currentTheme.color }"></div>
+            <div class="color-preview" :style="{ backgroundColor: currentColor }"></div>
           </div>
         </div>
       </el-card>
@@ -166,7 +166,7 @@
           v-for="theme in themes" 
           :key="theme.id"
           class="theme-item"
-          :class="{ active: currentTheme.id === theme.id }"
+          :class="{ active: currentThemeId === theme.id }"
           @click="selectTheme(theme)"
         >
           <div class="theme-color" :style="{ backgroundColor: theme.color }"></div>
@@ -178,7 +178,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getThemeSettings, saveThemeSettings } from '../utils/api'
+import { useTheme } from '../composables/useTheme'
 import type { User, ThemeSettings } from '../types'
 
 const props = defineProps<{
@@ -189,39 +189,32 @@ const emit = defineEmits<{
   (e: 'logout'): void
 }>()
 
+const { currentColor, setThemeColor } = useTheme()
+
 const showThemeDialog = ref(false)
 
 const themes: ThemeSettings[] = [
-  { id: 1, color: '#409EFF' },
-  { id: 2, color: '#67C23A' },
-  { id: 3, color: '#E6A23C' },
-  { id: 4, color: '#F56C6C' },
-  { id: 5, color: '#909399' },
+  { id: 1, color: '#6366f1' },
+  { id: 2, color: '#409EFF' },
+  { id: 3, color: '#67C23A' },
+  { id: 4, color: '#E6A23C' },
+  { id: 5, color: '#F56C6C' },
   { id: 6, color: '#9C27B0' },
   { id: 7, color: '#00BCD4' },
   { id: 8, color: '#FF9800' }
 ]
 
-const currentTheme = ref<ThemeSettings>(themes[0])
+const currentThemeId = ref(1)
 
-const loadThemeSettings = async () => {
-  try {
-    const data = await getThemeSettings()
-    const theme = themes.find(t => t.id === data.id) || themes[0]
-    currentTheme.value = theme
-  } catch (error) {
-    console.error('Error loading theme settings:', error)
-  }
+const loadThemeSettings = () => {
+  // Find which preset matches the current color
+  const theme = themes.find(t => t.color === currentColor.value)
+  currentThemeId.value = theme ? theme.id : 1
 }
 
 const selectTheme = async (theme: ThemeSettings) => {
-  currentTheme.value = theme
-  try {
-    await saveThemeSettings(theme)
-    console.log('Theme saved successfully')
-  } catch (error) {
-    console.error('Error saving theme:', error)
-  }
+  currentThemeId.value = theme.id
+  await setThemeColor(theme.color)
 }
 
 const handleLogout = () => {
@@ -235,7 +228,6 @@ onMounted(() => {
 
 <style scoped>
 .profile-container {
-  background-color: #f5f5f5;
   min-height: 100vh;
   padding-bottom: 100px;
 }

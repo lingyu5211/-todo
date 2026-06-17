@@ -673,7 +673,6 @@ export default {
   margin: 0 auto;
   padding: 0;
   min-height: 100vh;
-  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
 }
 
 .self-discipline-header {
@@ -681,9 +680,9 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -728,8 +727,8 @@ export default {
 }
 
 .start-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .start-content {
@@ -738,8 +737,8 @@ export default {
 }
 
 .focus-todo-info {
-  background-color: #e6f7ff;
-  border: 1px solid #91d5ff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   padding: 15px 20px;
   margin-bottom: 20px;
@@ -747,14 +746,14 @@ export default {
 
 .focus-label {
   font-size: 14px;
-  color: #1890ff;
+  color: var(--theme-primary);
   margin: 0 0 8px;
 }
 
 .focus-text {
   font-size: 18px;
   font-weight: bold;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   word-wrap: break-word;
 }
@@ -762,13 +761,13 @@ export default {
 .start-content h2 {
   font-size: 28px;
   margin-bottom: 20px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .start-content p {
   font-size: 16px;
   margin-bottom: 30px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* 统计信息样式 */
@@ -779,7 +778,7 @@ export default {
 .stats-section h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 
@@ -791,23 +790,23 @@ export default {
 }
 
 .stat-item {
-  background-color: #f5f7fa;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   padding: 15px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.4);
   margin-bottom: 5px;
 }
 
 .stat-value {
   font-size: 20px;
   font-weight: bold;
-  color: #1890ff;
+  color: var(--theme-primary);
 }
 
 /* 目标设置样式 */
@@ -818,7 +817,7 @@ export default {
 .goal-section h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 
@@ -837,7 +836,7 @@ export default {
 .progress-bar {
   width: 100%;
   height: 20px;
-  background-color: #e6f7ff;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 10px;
@@ -845,7 +844,7 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background-color: #52c41a;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 10px;
   transition: width 0.3s ease;
 }
@@ -860,13 +859,14 @@ export default {
 .history-section h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 
 .history-list {
-  background-color: #f5f7fa;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   padding: 15px;
   max-height: 200px;
   overflow-y: auto;
@@ -877,7 +877,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .history-item:last-child {
@@ -886,19 +886,19 @@ export default {
 
 .history-date {
   font-size: 14px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .history-duration {
   font-size: 14px;
   font-weight: bold;
-  color: #1890ff;
+  color: var(--theme-primary);
 }
 
 .no-history {
   text-align: center;
   padding: 20px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 14px;
 }
 
@@ -910,7 +910,7 @@ export default {
 .mode-section h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 
@@ -921,8 +921,9 @@ export default {
 }
 
 .pomodoro-settings {
-  background-color: #f5f7fa;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   padding: 20px;
   margin-top: 10px;
   margin-bottom: 20px;
@@ -941,7 +942,7 @@ export default {
 
 .setting-item span {
   font-size: 14px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .setting-item .el-input-number {
@@ -956,7 +957,7 @@ export default {
 .background-section h3 {
   font-size: 18px;
   margin-bottom: 15px;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 

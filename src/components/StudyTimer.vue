@@ -67,6 +67,6 @@ const toggleStudy = async () => {
 .timer-label {
   font-size: 24px;
   font-weight: 700;
-  color: #303133;
+  color: rgba(255, 255, 255, 0.8);
 }
 </style>

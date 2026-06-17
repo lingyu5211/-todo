@@ -48,10 +48,12 @@ const navigateTo = (name: string) => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background-color: white;
+  background: rgba(15, 12, 41, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 10px 0;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
 
@@ -60,12 +62,12 @@ const navigateTo = (name: string) => {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  color: #909399;
-  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color var(--transition-normal);
 }
 
 .nav-item.active {
-  color: #409EFF;
+  color: var(--theme-primary);
 }
 
 .nav-icon {

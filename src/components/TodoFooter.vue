@@ -79,7 +79,7 @@ export default {
   align-items: center;
   gap: 5px;
   font-size: 14px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .count-icon {
@@ -87,7 +87,7 @@ export default {
 }
 
 .remaining-count .count-icon {
-  color: #409EFF;
+  color: var(--theme-primary);
 }
 
 .completed-count .count-icon {

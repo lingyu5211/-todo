@@ -28,6 +28,33 @@ const room = ref<Room | null>(null)
 const members = ref<RoomMember[]>([])
 const chatMessages = ref<ChatMessage[]>([])
 
+// Deduplicate members by userId and update online count
+const syncMembers = () => {
+  const seen = new Map<number, RoomMember>()
+  for (const m of members.value) {
+    const existing = seen.get(m.userId)
+    // Prefer online entry over offline, studying over idle
+    if (!existing || (m.isOnline && !existing.isOnline)) {
+      seen.set(m.userId, m)
+    }
+  }
+  members.value = Array.from(seen.values())
+  if (room.value) {
+    room.value.onlineCount = members.value.filter(m => m.isOnline).length
+  }
+}
+
+// Thread-safe upsert into members array
+const upsertMember = (data: Partial<RoomMember> & { userId: number }) => {
+  const exists = members.value.find(m => m.userId === data.userId)
+  if (exists) {
+    Object.assign(exists, data)
+  } else {
+    members.value.push(data as RoomMember)
+  }
+  syncMembers()
+}
+
 const handleLeave = async () => {
   socketEmit('room:leave', { roomId: props.roomId })
   try { await leaveRoom(props.roomId) } catch { /* non-critical */ }
@@ -68,49 +95,26 @@ const setupSocket = () => {
   }, 500)
 
   onSocket('room:members', (data: any[]) => {
-    // Server list = currently connected users. Only these should be online.
+    // Server list = currently connected users — mark everyone not in it as offline
     const serverUserIds = new Set(data.map((m: any) => m.userId))
-    // Mark everyone not in server list as offline
     for (const m of members.value) {
       m.isOnline = serverUserIds.has(m.userId)
     }
-    // Upsert members from server list
     for (const m of data) {
-      const exists = members.value.find(x => x.userId === m.userId)
-      if (!exists) {
-        members.value.push({ ...m, isOnline: true })
-      } else {
-        exists.isOnline = true
-        exists.studyStatus = m.studyStatus || exists.studyStatus
-        exists.name = m.name || exists.name
-        exists.avatar = m.avatar || exists.avatar
-      }
+      upsertMember({ ...m, isOnline: true })
     }
-    // Keep header count in sync with WS reality
-    if (room.value) room.value.onlineCount = data.length
   })
 
   onSocket('room:member_joined', (data: any) => {
-    const exists = members.value.find(m => m.userId === data.userId)
-    if (!exists) {
-      members.value.push({ ...data, isOnline: true })
-    } else {
-      exists.isOnline = true
-      exists.studyStatus = data.studyStatus
-    }
-    // Sync header count
-    if (room.value) room.value.onlineCount = members.value.filter(m => m.isOnline).length
+    upsertMember({ ...data, isOnline: true })
   })
 
   onSocket('room:member_left', ({ userId }: { userId: number }) => {
-    const m = members.value.find(x => x.userId === userId)
-    if (m) m.isOnline = false
-    if (room.value) room.value.onlineCount = members.value.filter(m => m.isOnline).length
+    upsertMember({ userId, isOnline: false })
   })
 
   onSocket('room:member_status', ({ userId, studyStatus }: { userId: number; studyStatus: string }) => {
-    const m = members.value.find(x => x.userId === userId)
-    if (m) m.studyStatus = studyStatus as any
+    upsertMember({ userId, studyStatus: studyStatus as RoomMember['studyStatus'] })
   })
 
   onSocket('chat:message', (msg: ChatMessage) => {
@@ -134,7 +138,6 @@ onUnmounted(() => {
 <style scoped>
 .study-room-container {
   min-height: 100vh;
-  background: #f5f5f5;
 }
 .room-body {
   padding: 12px 16px;
